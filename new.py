@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import io
 import base64
 import tensorflow as tf
+from skimage import img_as_float, exposure
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -117,7 +118,7 @@ def plot_gray_scale_histogram(image, title, bins=100):
 
     # plt.show()
     
-from skimage import img_as_float, exposure
+
 
 
 def img_and_hist(image_data, axes, bins=100):
@@ -260,8 +261,6 @@ def process_image(file_path, filename):
     hist, bins = generate_histogram(img_array)
     plot_gray_scale_histogram(img_array,"histogram")
     
-    
-
     # Generate LIME Explanation
     lime_exp_img = generate_lime_explanation(np.expand_dims(img_array, axis=0), model)
 
@@ -349,6 +348,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.ndimage import binary_erosion
 from sklearn.feature_extraction import image
+
+# this is the supportive function for MFPP
 
 def fragment_image(image, num_fragments):
     # Convert image to binary

@@ -22,6 +22,7 @@
         h2 {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #555;
+            text-align:center;
         }
 
         img {
@@ -43,6 +44,7 @@
         .gradcam-image {
             text-align: center;
             margin-bottom: 40px;
+          
         }
 
         .gradcam-image img {
@@ -56,6 +58,11 @@
             margin-top: 5px;
             margin-bottom: 0;
         }
+        .gradCam{
+            display: flex;
+            flex-direction: row;
+            gap: 20 px;
+        }
     </style>
 </head>
 <body>
@@ -64,17 +71,20 @@
     <h2>Result: {{ result }}</h2>
 
     <h2>Histogram:</h2>
-    <img src="{{ url_for('static', filename=hist_img) }}" alt="Histogram">
+    <img  src="{{ url_for('static', filename=hist_img) }}" alt="Histogram"  width="400" 
+     height="500">
     
     <h2>LIME Explanation:</h2>
     <img src="{{ url_for('static', filename=lime_exp_filename) }}" alt="LIME Explanation">
     <h2>Grad-CAM Images:</h2>
+    <div  class="gradCam" >
     {% for layer, img in grad_cam_imgs.items() %}
     <div class="gradcam-image">
         <img src="data:image/png;base64,{{ img }}" alt="{{ layer }}">
         <h4>{{ layer }}</h4>
     </div>
     {% endfor %}
+</div>
     <h2>MFPP Expalantion</h2>
     <img src="{{ url_for('static', filename=mfpp_exp) }}" alt="MFPP Explanation">
 </body>
