@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+
+        h2 {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #555;
+        }
+
+        img {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #777;
+            margin-top: 30px;
+        }
+
+        .gradcam-image {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .gradcam-image img {
+            max-width: 200px;
+            margin-bottom: 10px;
+        }
+
+        .gradcam-image h4 {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #777;
+            margin-top: 5px;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Result</h1>
+    <h2>Filename: {{ filename }}</h2>
+    <h2>Result: {{ result }}</h2>
+
+    <h2>Histogram:</h2>
+    <img src="{{ url_for('static', filename=hist_img) }}" alt="Histogram">
+    
+    <h2>LIME Explanation:</h2>
+    <img src="{{ url_for('static', filename=lime_exp_filename) }}" alt="LIME Explanation">
+    <h2>Grad-CAM Images:</h2>
+    {% for layer, img in grad_cam_imgs.items() %}
+    <div class="gradcam-image">
+        <img src="data:image/png;base64,{{ img }}" alt="{{ layer }}">
+        <h4>{{ layer }}</h4>
+    </div>
+    {% endfor %}
+    <h2>MFPP Expalantion</h2>
+    <img src="{{ url_for('static', filename=mfpp_exp) }}" alt="MFPP Explanation">
+</body>
+</html>
