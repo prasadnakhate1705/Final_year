@@ -1,5 +1,6 @@
 # main.py
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import os
 import numpy as np
@@ -15,8 +16,10 @@ import tensorflow as tf
 from skimage import img_as_float, exposure
 
 app = Flask(__name__)
+CORS(app)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 model = load_model("trainedmodel.h5")
+global_data = {}
 
 def numpize(image_path: str, img_size=(128, 128), grayscale=False):
     """
@@ -42,41 +45,41 @@ def numpize(image_path: str, img_size=(128, 128), grayscale=False):
 
     return data / 255.0
 
-def compute_gradcam_for_layer(model, img_array, layer_name):
-    # Create a gradient model
-    gradient_model = tf.keras.models.Model([model.inputs], [model.get_layer(layer_name).output, model.output])
+# def compute_gradcam_for_layer(model, img_array, layer_name):
+#     # Create a gradient model
+#     gradient_model = tf.keras.models.Model([model.inputs], [model.get_layer(layer_name).output, model.output])
     
-    # Calculate gradients
-    with tf.GradientTape() as tape:
-        last_conv_output, model_output = gradient_model(img_array)
-        tape.watch(last_conv_output)
-        tape.watch(model_output)
-        pred_index = tf.argmax(model_output[0])
-        output = model_output[:, pred_index]
+#     # Calculate gradients
+#     with tf.GradientTape() as tape:
+#         last_conv_output, model_output = gradient_model(img_array)
+#         tape.watch(last_conv_output)
+#         tape.watch(model_output)
+#         pred_index = tf.argmax(model_output[0])
+#         output = model_output[:, pred_index]
 
-    # Get the gradients
-    grads = tape.gradient(output, last_conv_output)[0]
+#     # Get the gradients
+#     grads = tape.gradient(output, last_conv_output)[0]
 
-    # Compute the guided gradients
-    guided_grads = (last_conv_output[0] * grads)
+#     # Compute the guided gradients
+#     guided_grads = (last_conv_output[0] * grads)
 
-    # Get the heatmap
-    heatmap = tf.reduce_mean(guided_grads, axis=-1)
+#     # Get the heatmap
+#     heatmap = tf.reduce_mean(guided_grads, axis=-1)
 
-    # Normalize the heatmap
-    heatmap = np.maximum(heatmap, 0) / np.max(heatmap)
+#     # Normalize the heatmap
+#     heatmap = np.maximum(heatmap, 0) / np.max(heatmap)
 
-    # Resize the heatmap to the original image size
-    heatmap = cv2.resize(heatmap, (img_array.shape[2], img_array.shape[1]))
+#     # Resize the heatmap to the original image size
+#     heatmap = cv2.resize(heatmap, (img_array.shape[2], img_array.shape[1]))
 
-    # Convert heatmap to RGB
-    heatmap = np.uint8(255 * heatmap)
-    heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
+#     # Convert heatmap to RGB
+#     heatmap = np.uint8(255 * heatmap)
+#     heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
 
-    # Blend the heatmap with the original image
-    superimposed_img = cv2.addWeighted(np.uint8(img_array[0] * 255), 0.6, heatmap, 0.4, 0)
+#     # Blend the heatmap with the original image
+#     superimposed_img = cv2.addWeighted(np.uint8(img_array[0] * 255), 0.6, heatmap, 0.4, 0)
 
-    return superimposed_img
+#     return superimposed_img
 
 def plot_gray_scale_histogram(image, title, bins=100):
     '''
@@ -245,7 +248,16 @@ def upload_file():
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
             result = process_image(file_path, filename)
-            return result
+            
+            # Assign the data to global variables
+            global_data['filename'] = result['filename']
+            global_data['result'] = result['result']
+            global_data['hist_img'] = result['hist_img']
+            global_data['lime_exp_filename'] = result['lime_exp_filename']
+            # global_data['grad_cam_imgs'] = result['grad_cam_imgs']
+            global_data['mfpp_exp'] = result['mfpp_exp']
+            
+            return jsonify(result)
     
     return render_template('upload.html')
 
@@ -271,18 +283,31 @@ def process_image(file_path, filename):
 
     # Generate Grad-CAM for each layer
     grad_cam_images = {}
-    layer_names = [layer.name for layer in model.layers]
-    for layer_name in layer_names:
-        grad_cam_img = compute_gradcam_for_layer(model, np.expand_dims(img_array, axis=0), layer_name)
-        grad_cam_images[layer_name] = grad_cam_img
+    # layer_names = [layer.name for layer in model.layers]
+    # for layer_name in layer_names:
+    #     grad_cam_img = compute_gradcam_for_layer(model, np.expand_dims(img_array, axis=0), layer_name)
+    #     grad_cam_images[layer_name] = grad_cam_img
 
-    # Convert images to base64 for HTML rendering
-    # hist_img = plot_histogram(hist, bins)
-    grad_cam_imgs = {layer: cv2_to_base64(grad_cam_images[layer]) for layer in grad_cam_images}
-    print(lime_exp_path)
+    # # Convert images to base64 for HTML rendering
+    # # hist_img = plot_histogram(hist, bins)
+    # grad_cam_imgs = {layer: cv2_to_base64(grad_cam_images[layer]) for layer in grad_cam_images}
+    # print(lime_exp_path)
     
     mfpp_exp_path=mfpp_exp(file_path)
-    return render_template('result.html', filename=filename, result=result, hist_img="histogram_output.png", lime_exp_filename=lime_exp_filename, grad_cam_imgs=grad_cam_imgs, mfpp_exp=mfpp_exp_path)
+    # return render_template('result.html', filename=filename, result=result, hist_img="histogram_output.png", lime_exp_filename=lime_exp_filename, grad_cam_imgs=grad_cam_images, mfpp_exp=mfpp_exp_path)
+    return {
+        'filename': filename,
+        'result': result,
+        'hist_img': "histogram_output.png",
+        'lime_exp_filename': lime_exp_filename,
+        'grad_cam_imgs': grad_cam_images,  # Make sure this is properly populated with image paths or data
+        'mfpp_exp': mfpp_exp_path
+    }
+    
+@app.route('/get_global_data', methods=['GET'])
+def get_global_data():
+    return jsonify(global_data)
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg'}
 
@@ -428,4 +453,4 @@ def cv2_to_base64(image):
     return image_base64
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=8080)
