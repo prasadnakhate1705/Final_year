@@ -4,11 +4,11 @@ import { Inbox } from "lucide-react";
 import { ArrowRight, LoaderCircle } from "lucide-react";
 import { Button, buttonVariants } from "../../components/ui/button";
 import cn from "../lib/utils";
-import { useFormStatus } from "react-dom";
 
-const FileUpload = () => {
+const FileUpload = ({ router }) => {
   const [file, setFile] = useState(null);
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -39,10 +39,12 @@ const FileUpload = () => {
       // Handle success, e.g., display a success message
       console.log("File uploaded successfully");
       // redirect
+      router.push("/result");
     } catch (error) {
-      console.error("Error uploading file:", error.message);
       // Handle error, e.g., display an error message
+      console.error("Error uploading file:", error.message);
     }
+    setIsLoading(false);
   };
 
   return (
@@ -55,8 +57,8 @@ const FileUpload = () => {
           >
             <>
               <Inbox className="w-10 h-10 text-blue-700 " />
-              <p className="mt-2 text-sm text-slate-400">
-                Select your Image Here
+              <p className="mt-2 text-sm text-slate-400 break-all">
+                {file ? file.name : "Select your Image Here"}
               </p>
             </>
             <input
@@ -81,12 +83,17 @@ const FileUpload = () => {
           </label>
           <button
             type="submit"
+            onClick={() => setIsLoading(true)}
             className={cn(
               buttonVariants(),
               "bg-blue-700 text-white duration-300 rounded-xl h-[100px] ml-2"
             )}
           >
-            <ArrowRight />
+            {isLoading ? (
+              <LoaderCircle className="animate-spin" />
+            ) : (
+              <ArrowRight />
+            )}
           </button>
         </div>
       </form>
