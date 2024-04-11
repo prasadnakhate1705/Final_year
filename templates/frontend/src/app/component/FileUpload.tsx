@@ -83,7 +83,7 @@ const FileUpload = ({ router }) => {
           </label>
           <button
             type="submit"
-            onClick={() => setIsLoading(true)}
+            onClick={() => file && setIsLoading(true)}
             className={cn(
               buttonVariants(),
               "bg-blue-700 text-white duration-300 rounded-xl h-[100px] ml-2"
