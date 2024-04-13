@@ -1,10 +1,11 @@
 import React from "react";
-import Head from "next/head";
+import Image from "next/image";
+import lime_img from "../../../assets/lime.png";
 
 const mfpp = () => {
   return (
     <div className="flex flex-col pt-10 min-h-screen py-2">
-      <main className="flex flex-col w-full pt-20 flex-1 px-20 text-center">
+      <main className="flex flex-col w-full pt-20 flex-1 pl-20 pr-14 text-center">
         <div className="flex flex-row">
           <div>
             <h1 className="text-2xl font-bold text-left">LIME</h1>
@@ -22,7 +23,12 @@ const mfpp = () => {
               on the original input features.
             </p>
           </div>
-          <div></div>
+          <div className="mt-6 rounded-lg shadow-xl ml-6 border-gray-300 border">
+            <Image src={lime_img} width={500} height={500} alt="Lime image" />
+            <p className="italic text-sm text-gray-500 mt-6">
+              Source: https://arxiv.org/pdf/1602.04938.pdf
+            </p>
+          </div>
         </div>
 
         <div className="flex flex-row mt-4">

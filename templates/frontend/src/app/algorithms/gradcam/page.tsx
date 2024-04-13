@@ -1,5 +1,6 @@
 import React from "react";
-import Head from "next/head";
+import Image from "next/image";
+import gradcam_img from "../../../assets/gradcam.webp";
 
 const gradcam = () => {
   return (
@@ -18,7 +19,18 @@ const gradcam = () => {
               model's decision-making process.
             </p>
           </div>
-          <div></div>
+          <div className="mt-6 rounded-lg shadow-xl ml-6 border-gray-300 border">
+            <Image
+              src={gradcam_img}
+              width={500}
+              height={500}
+              className="mt-2"
+              alt="Lime image"
+            />
+            <p className="italic text-sm text-gray-500 mt-4">
+              Source: https://medium.com/@ninads79shukla/gradcam-73a752d368be
+            </p>
+          </div>
         </div>
 
         <div className="flex flex-row mt-4">

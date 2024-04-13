@@ -1,5 +1,4 @@
 import React from "react";
-import Head from "next/head";
 import Image from "next/image";
 import lime_img from "../../../assets/lime.png";
 
@@ -24,8 +23,11 @@ const lime = () => {
               on the original input features.
             </p>
           </div>
-          <div className="mt-6 rounded-md shadow-xl ml-6 border-gray-700 border">
+          <div className="mt-6 rounded-lg shadow-xl ml-6 border-gray-300 border">
             <Image src={lime_img} width={500} height={500} alt="Lime image" />
+            <p className="italic text-sm text-gray-500 mt-6">
+              Source: https://arxiv.org/pdf/1602.04938.pdf
+            </p>
           </div>
         </div>
 
