@@ -3,19 +3,29 @@
 import Link from "next/link";
 import { ArrowRight, PlayCircle } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { TypewriterEffect } from "@/components/ui/typewriter-effect";
 import cn from "./lib/utils";
 import Image from "next/image";
-import FileUpload from "./component/FileUpload";
-import { useRouter } from "next/navigation";
+import Explaination from "./component/Explaination";
+import Features from "./component/Features";
+
+const words = [
+  {
+    text: "Image",
+  },
+  {
+    text: "Detection: ",
+    className: "text-blue-700",
+  },
+];
 
 export default function Home() {
-  const router = useRouter();
   return (
     <>
-      <div className="mb-12 mt-28 sm:mt-40 flex flex-col items-center justify-center text-center">
+      <div className="mb-12 mt-28 sm:mt-30 px-16 flex flex-col items-center justify-center text-center">
         <h1 className="max-w-4xl text-4xl md:text-5xl lg:text-5xl font-bold">
-          Image <span className="text-blue-700">Detection</span>: Enhance
-          Understanding with Explainable AI
+          <TypewriterEffect words={words} /> Enhance Understanding with
+          Explainable AI
         </h1>
         <p className="mt-5 max-w-prose text-zinc-700 sm:text-md">
           Images made simple: Go your way through complex Tuberculosis(TB)
@@ -44,8 +54,13 @@ export default function Home() {
             <PlayCircle className="ml-2 h-5 w-5 animate-bounce" />
           </Link>
         </div>
-        <FileUpload router={router} />
       </div>
+      <div className="h-28"></div>
+      <Explaination />
+      <h1 className="text-3xl px-20 mt-10 mb-0 font-semibold">
+        Provide image detection with AI-generated explanations for users
+      </h1>
+      <Features />
     </>
   );
 }

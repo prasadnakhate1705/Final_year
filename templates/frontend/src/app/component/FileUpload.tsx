@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Inbox } from "lucide-react";
 import { ArrowRight, LoaderCircle } from "lucide-react";
 import { Button, buttonVariants } from "../../components/ui/button";
+import { toast } from "sonner";
 import cn from "../lib/utils";
 
 const FileUpload = ({ router }) => {
@@ -36,10 +37,23 @@ const FileUpload = ({ router }) => {
       if (!response.ok) {
         throw new Error("Failed to upload file");
       }
+
       // Handle success, e.g., display a success message
       console.log("File uploaded successfully");
+      const d = new Date();
+
+      //toast
+      toast("Result has been generated!!", {
+        description: d,
+        action: {
+          label: "✖",
+          onClick: () => console.log("Undo"),
+        },
+      });
+
+      setTimeout(router.push("/result"), 3000);
       // redirect
-      router.push("/result");
+      // router.push("/result");
     } catch (error) {
       // Handle error, e.g., display an error message
       console.error("Error uploading file:", error.message);
@@ -48,9 +62,9 @@ const FileUpload = ({ router }) => {
   };
 
   return (
-    <div>
+    <div className="relative">
       <form onSubmit={handleSubmit}>
-        <div className="p-8 bg-white rounded-xl flex flex-row absolute -translate-x-1/2 -translate-y-1/2 left-1/2 top-[470px]">
+        <div className="p-8 bg-white rounded-xl flex flex-row">
           <label
             htmlFor="inputTag"
             className="border-dashed border-4 cursor-pointer rounded-xl w-[300px] h-[100px] bg-gray-50 hover:bg-gray-100 py-4 flex justify-center items-center flex-col"
@@ -86,7 +100,7 @@ const FileUpload = ({ router }) => {
             onClick={() => file && setIsLoading(true)}
             className={cn(
               buttonVariants(),
-              "bg-blue-700 text-white duration-300 rounded-xl h-[100px] ml-2"
+              "bg-blue-700 text-white duration-300 rounded-xl h-[100px] ml-2 transition hover:scale-110 duration-300 ease-in-out"
             )}
           >
             {isLoading ? (
