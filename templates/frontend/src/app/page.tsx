@@ -8,6 +8,8 @@ import cn from "./lib/utils";
 import Image from "next/image";
 import Explaination from "./component/Explaination";
 import Features from "./component/Features";
+import FileUpload from "./component/FileUpload";
+import {useRouter} from "next/navigation"
 
 const words = [
   {
@@ -20,6 +22,7 @@ const words = [
 ];
 
 export default function Home() {
+  const router = useRouter()
   return (
     <>
       <div className="mb-12 mt-28 sm:mt-30 px-16 flex flex-col items-center justify-center text-center">
@@ -53,7 +56,8 @@ export default function Home() {
             See how it works{" "}
             <PlayCircle className="ml-2 h-5 w-5 animate-bounce" />
           </Link>
-        </div>
+          <FileUpload router={router} />
+        </div>grad_cam_imgs
       </div>
       <div className="h-28"></div>
       <Explaination />

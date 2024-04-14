@@ -14,7 +14,43 @@ interface ResultProps {
   lime_exp_filename: string;
   grad_cam_imgs: { [key: string]: string };
   mfpp_exp: string;
+  predictionBymodel: string;
+  model_stats: {
+    Model: string;
+    accuracy_train: string;
+    accuracy_val: string;
+    Subset: string;
+    "Training time": string;
+    "Training in seconds": number;
+    TP: number;
+    FP: number;
+    FN: number;
+    TN: number;
+    Precision: number;
+    Recall: number;
+    F1: number;
+    AUC: number;
+    Accuracy: number;
+  };
+  get_config: {
+    name: string;
+    weight_decay: null | number;
+    clipnorm: null | number;
+    global_clipnorm: null | number;
+    clipvalue: null | number;
+    use_ema: boolean;
+    ema_momentum: number;
+    ema_overwrite_frequency: null | number;
+    jit_compile: boolean;
+    is_legacy_optimizer: boolean;
+    learning_rate: number;
+    beta_1: number;
+    beta_2: number;
+    epsilon: number;
+    amsgrad: boolean;
+  };
 }
+
 
 const ResultPage: React.FC = () => {
   const [data, setData] = useState<ResultProps | null>({});
@@ -45,17 +81,19 @@ const ResultPage: React.FC = () => {
     return <div>Loading...</div>;
   }
 
-  // Destructure data properties with optional chaining
-  const {
-    filename,
-    result,
-    hist_img,
-    lime_exp_filename,
-    grad_cam_imgs,
-    mfpp_exp,
-  } = data!;
+ const {
+  filename,
+  result,
+  hist_img,
+  lime_exp_filename,
+  grad_cam_imgs,
+  mfpp_exp,
+  predictionBymodel,
+  model_stats,
+  get_config,
+} = data!;
 
-  return (
+return (
     <div className="p-24 flex flex-col justify-center items-center font-semibold">
       <div className="sm:w-[800px] flex flex-col lg:flex-row gap-2 bg-gray-100 h-40 md:h-24 items-center justify-evenly rounded-lg w-[400px]">
         <h2 className="flex italic font-normal ml-2">
@@ -109,6 +147,23 @@ const ResultPage: React.FC = () => {
         height="800"
         className="shadow-xl p-4 rounded-lg"
       />
+      <div>
+        <h2>Grad-CAM Images:</h2>
+        <div className="flex flex-wrap">
+          {Object.keys(grad_cam_imgs).map((layer) => (
+            <div key={layer} className="m-2">
+              <h3>{layer}</h3>
+              <Image
+                src={`http://localhost:8080/static/${grad_cam_imgs[layer]}`}
+                alt={`${layer} Grad-CAM`}
+                width="200"
+                height="200"
+                className="shadow-xl p-4 rounded-lg"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

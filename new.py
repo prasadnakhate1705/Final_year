@@ -46,6 +46,50 @@ def numpize(image_path: str, img_size=(128, 128), grayscale=False):
     data = np.asarray(resized_image)
 
     return data / 255.0
+import os
+
+def compute_gradcam_for_layer(model, img_array, layer_name, output_folder='static'):
+    print("inside gradcam")
+    # Create a gradient model
+    gradient_model = tf.keras.models.Model([model.inputs], [model.get_layer(layer_name).output, model.output])
+    
+    # Calculate gradients
+    with tf.GradientTape() as tape:
+        last_conv_output, model_output = gradient_model(img_array)
+        tape.watch(last_conv_output)
+        tape.watch(model_output)
+        pred_index = tf.argmax(model_output[0])
+        output = model_output[:, pred_index]
+
+    # Get the gradients
+    grads = tape.gradient(output, last_conv_output)[0]
+
+    # Compute the guided gradients
+    guided_grads = (last_conv_output[0] * grads)
+
+    # Get the heatmap
+    heatmap = tf.reduce_mean(guided_grads, axis=-1)
+
+    # Normalize the heatmap
+    heatmap = np.maximum(heatmap, 0) / np.max(heatmap)
+
+    # Resize the heatmap to the original image size
+    heatmap = cv2.resize(heatmap, (img_array.shape[2], img_array.shape[1]))
+
+    # Convert heatmap to RGB
+    heatmap = np.uint8(255 * heatmap)
+    heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
+
+    # Blend the heatmap with the original image
+    superimposed_img = cv2.addWeighted(np.uint8(img_array[0] * 255), 0.6, heatmap, 0.4, 0)
+
+    # Save the superimposed image
+    output_path = os.path.join("static/",f"{layer_name}_gradcam.png")
+    print("saving image for "+ f"{layer_name}_gradcam.png")
+    cv2.imwrite(output_path, superimposed_img)
+
+    return f"{layer_name}_gradcam.png"
+
 
 # def compute_gradcam_for_layer(model, img_array, layer_name):
 #     # Create a gradient model
@@ -170,7 +214,7 @@ def generate_lime_explanation(img_array, model):
 
     # Make predictions
     prediction = model.predict(img_array)
-    print("Model Prediction:", prediction)
+    # print("Model Prediction:", prediction)
 
     # Explain predictions for the image
     explanation = explainer.explain_instance(img_array[0], model.predict, top_labels=1, hide_color=0, num_samples=1000)
@@ -249,19 +293,57 @@ def upload_file():
             filename = secure_filename(file.filename)
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
-            result = process_image(file_path, filename)
-            
-            # Assign the data to global variables
-            global_data['filename'] = result['filename']
-            global_data['result'] = result['result']
-            global_data['hist_img'] = result['hist_img']
-            global_data['lime_exp_filename'] = result['lime_exp_filename']
-            # global_data['grad_cam_imgs'] = result['grad_cam_imgs']
-            global_data['mfpp_exp'] = result['mfpp_exp']
-            
+            result = process_image(file_path, filename)            
             return jsonify(result)
     
     return render_template('upload.html')
+
+# def process_image(file_path, filename):
+#     # Load the uploaded image
+#     img_array = numpize(file_path, img_size=(128, 128), grayscale=False)
+    
+#     # Prediction
+#     prediction = model.predict(np.expand_dims(img_array, axis=0))
+#     result = "Tuberculosis" if prediction[0] >= 0.8 else "Normal"
+
+#     # Generate Histogram
+#     hist, bins = generate_histogram(img_array)
+#     plot_gray_scale_histogram(img_array,"histogram")
+    
+#     # Generate LIME Explanation
+#     lime_exp_img = generate_lime_explanation(np.expand_dims(img_array, axis=0), model)
+
+#     # Save Lime explanation plot as a PNG file
+#     lime_exp_filename = f"lime_exp_{uuid.uuid4()}.png"
+#     lime_exp_path = os.path.join('static', lime_exp_filename)
+#     plt.imsave(lime_exp_path, lime_exp_img)
+
+#     # Generate Grad-CAM for each layer
+#     grad_cam_images = {}
+#     layer_names = [layer.name for layer in model.layers]
+#     for layer_name in layer_names:
+#         grad_cam_img = compute_gradcam_for_layer(model, np.expand_dims(img_array, axis=0), layer_name)
+#         grad_cam_images[layer_name] = grad_cam_img
+
+#     # Convert images to base64 for HTML rendering
+#     # hist_img = plot_histogram(hist, bins)
+#     grad_cam_imgs = {layer: cv2_to_base64(grad_cam_images[layer]) for layer in grad_cam_images}
+#     # print(lime_exp_path)
+    
+#     mfpp_exp_path=mfpp_exp(file_path)
+#     # return render_template('result.html', filename=filename, result=result, hist_img="histogram_output.png", lime_exp_filename=lime_exp_filename, grad_cam_imgs=grad_cam_images, mfpp_exp=mfpp_exp_path)
+#     return {
+#         'filename': filename,
+#         'result': result,
+#         'hist_img': "histogram_output.png",
+#         'lime_exp_filename': lime_exp_filename,
+#         'grad_cam_imgs': grad_cam_imgs,  # Make sure this is properly populated with image paths or data
+#         'mfpp_exp': mfpp_exp_path
+#     }
+    
+
+import os
+import uuid
 
 def process_image(file_path, filename):
     # Load the uploaded image
@@ -273,7 +355,7 @@ def process_image(file_path, filename):
 
     # Generate Histogram
     hist, bins = generate_histogram(img_array)
-    plot_gray_scale_histogram(img_array,"histogram")
+    plot_gray_scale_histogram(img_array, "histogram")
     
     # Generate LIME Explanation
     lime_exp_img = generate_lime_explanation(np.expand_dims(img_array, axis=0), model)
@@ -285,27 +367,70 @@ def process_image(file_path, filename):
 
     # Generate Grad-CAM for each layer
     grad_cam_images = {}
-    # layer_names = [layer.name for layer in model.layers]
-    # for layer_name in layer_names:
-    #     grad_cam_img = compute_gradcam_for_layer(model, np.expand_dims(img_array, axis=0), layer_name)
-    #     grad_cam_images[layer_name] = grad_cam_img
+    layer_names = [layer.name for layer in model.layers]
+    for layer_name in layer_names:
+        grad_cam_path = compute_gradcam_for_layer(model, np.expand_dims(img_array, axis=0), layer_name)
+        grad_cam_images[layer_name] = grad_cam_path
 
-    # # Convert images to base64 for HTML rendering
-    # # hist_img = plot_histogram(hist, bins)
-    # grad_cam_imgs = {layer: cv2_to_base64(grad_cam_images[layer]) for layer in grad_cam_images}
-    # print(lime_exp_path)
+    # Convert images to base64 for HTML rendering
+    grad_cam_imgs = {layer: grad_cam_images[layer] for layer in grad_cam_images}
     
-    mfpp_exp_path=mfpp_exp(file_path)
-    # return render_template('result.html', filename=filename, result=result, hist_img="histogram_output.png", lime_exp_filename=lime_exp_filename, grad_cam_imgs=grad_cam_images, mfpp_exp=mfpp_exp_path)
-    return {
+    mfpp_exp_path = mfpp_exp(file_path)
+    print(prediction[0][0])
+    pred=str(prediction[0][0])
+    print('------------------------')
+    print("gracam" , grad_cam_imgs)
+    
+    
+    # Assign the data to global variables
+    global_data.update({
+        
         'filename': filename,
         'result': result,
         'hist_img': "histogram_output.png",
         'lime_exp_filename': lime_exp_filename,
-        'grad_cam_imgs': grad_cam_images,  # Make sure this is properly populated with image paths or data
-        'mfpp_exp': mfpp_exp_path
-    }
-    
+        'grad_cam_imgs': grad_cam_imgs,
+        'mfpp_exp': mfpp_exp_path,
+        'predictionBymodel': pred,
+        'model_stats': {
+            'Model': 'CNN',
+            'accuracy_train': '0.7841071486473083',
+            'accuracy_val': '0.8871428370475769',
+            'Subset': 'Training',
+            'Training time': "1 minutes 2 seconds",
+            'Training in seconds': 62.358063,
+            'TP': 2776,
+            'FP': 24,
+            'FN': 40,
+            'TN': 2760,
+            'Precision': 0.988587,
+            'Recall': 0.988571,
+            'F1': 0.988571,
+            'AUC': 0.988571,
+            'Accuracy': 0.988571,
+            
+        },
+        'get_config': {
+            'name': 'Adam',
+            'weight_decay': None,
+            'clipnorm': None,
+            'global_clipnorm': None,
+            'clipvalue': None,
+            'use_ema': False,
+            'ema_momentum': 0.99,
+            'ema_overwrite_frequency': None,
+            'jit_compile': False,
+            'is_legacy_optimizer': False,
+            'learning_rate': 0.001,
+            'beta_1': 0.9,
+            'beta_2': 0.999,
+            'epsilon': 1e-07,
+            'amsgrad': False
+        }
+        
+    })
+
+
 @app.route('/get_global_data', methods=['GET'])
 def get_global_data():
     return jsonify(global_data)
