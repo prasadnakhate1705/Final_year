@@ -15,10 +15,12 @@ import base64
 import tensorflow as tf
 from skimage import img_as_float, exposure
 
+
 app = Flask(__name__)
 CORS(app)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 model = load_model("trainedmodel.h5")
+
 global_data = {}
 
 def numpize(image_path: str, img_size=(128, 128), grayscale=False):
@@ -104,7 +106,7 @@ def plot_gray_scale_histogram(image, title, bins=100):
     std_value = np.std(image)
     min_value = np.min(image)
     max_value = np.max(image)
-
+    
     axes[0].set_title('Image\nMean: {:.2f}, Std: {:.2f}, Min: {:.2f}, Max: {:.2f}'.format(
         mean_value, std_value, min_value, max_value), fontsize=12)
     axes[0].set_axis_off()
