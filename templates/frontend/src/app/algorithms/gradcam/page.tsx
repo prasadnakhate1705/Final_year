@@ -1,6 +1,51 @@
+"use client";
 import React from "react";
 import Image from "next/image";
 import gradcam_img from "../../../assets/gradcam.webp";
+import { CopyBlock } from "react-code-blocks";
+import { Copy } from "lucide-react";
+
+const code = `import pandas as pd;
+df = pd.read_csv('some_random.csv');
+df.head(5)`;
+const language = "python";
+const myCustomTheme = {
+  lineNumberColor: "#ccc",
+  lineNumberBgColor: "#222",
+  backgroundColor: "#222",
+  textColor: "#ccc",
+  substringColor: "#00ff00",
+  keywordColor: "#0077ff",
+  attributeColor: "#ffaa00",
+  selectorTagColor: "#0077ff",
+  docTagColor: "#aa00ff",
+  nameColor: "#f8f8f8",
+  builtInColor: "#0077ff",
+  literalColor: "#ffaa00",
+  bulletColor: "#ffaa00",
+  codeColor: "#ccc",
+  additionColor: "#00ff00",
+  regexpColor: "#f8f8f8",
+  symbolColor: "#ffaa00",
+  variableColor: "#ffaa00",
+  templateVariableColor: "#ffaa00",
+  linkColor: "#aa00ff",
+  selectorAttributeColor: "#ffaa00",
+  selectorPseudoColor: "#aa00ff",
+  typeColor: "#0077ff",
+  stringColor: "#00ff00",
+  selectorIdColor: "#ffaa00",
+  quoteColor: "#f8f8f8",
+  templateTagColor: "#ccc",
+  deletionColor: "#ff0000",
+  titleColor: "#0077ff",
+  sectionColor: "#0077ff",
+  commentColor: "#777",
+  metaKeywordColor: "#f8f8f8",
+  metaColor: "#aa00ff",
+  functionColor: "#0077ff",
+  numberColor: "#ffaa00",
+};
 
 const gradcam = () => {
   return (
@@ -33,7 +78,7 @@ const gradcam = () => {
           </div>
         </div>
 
-        <div className="flex flex-row mt-4">
+        <div className="flex flex-row mt-4 justify-between">
           <div className="w-[50vw]">
             <p className="text-2xl text-left font-bold">STEPS: </p>
             <ul className="text-left text-sm leading-loose">
@@ -93,7 +138,16 @@ const gradcam = () => {
               </li>
             </ul>
           </div>
-          <div></div>
+          <div className="w-[35vw] text-sm text-left rounded-xl">
+            <CopyBlock
+              text={code}
+              language={language}
+              showLineNumbers={true}
+              wrapLines={true}
+              theme={myCustomTheme}
+              codeBlock
+            />
+          </div>
         </div>
       </main>
     </div>
