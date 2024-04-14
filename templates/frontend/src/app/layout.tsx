@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import cn from "./lib/utils";
 import Navbar from "./component/Navbar";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="light">
+    <html lang="en" className="light scroll-smooth">
       <body
         className={cn(
           "min-hscreen font-sans antialised grainy",
@@ -26,6 +27,7 @@ export default function RootLayout({
       >
         <Navbar />
         {children}
+        <Toaster />
       </body>
     </html>
   );
