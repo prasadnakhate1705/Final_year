@@ -364,6 +364,8 @@ def process_image(file_path, filename):
     lime_exp_filename = f"lime_exp_{uuid.uuid4()}.png"
     lime_exp_path = os.path.join('static', lime_exp_filename)
     plt.imsave(lime_exp_path, lime_exp_img)
+    
+    LRP_exp(file_path)
 
     # Generate Grad-CAM for each layer
     grad_cam_images = {}
@@ -426,7 +428,8 @@ def process_image(file_path, filename):
             'beta_2': 0.999,
             'epsilon': 1e-07,
             'amsgrad': False
-        }
+        },
+        
         
     })
 
@@ -578,6 +581,71 @@ def cv2_to_base64(image):
     image_encoded = base64.b64encode(buf)
     image_base64 = image_encoded.decode('utf-8')
     return image_base64
+
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.models import load_model
+import matplotlib.pyplot as plt
+#LRP
+def compute_lrp_for_layer(model, img_array, layer_name):
+    # Define a sub-model that outputs the activations of the specified layer
+    sub_model = tf.keras.Model(inputs=model.input, outputs=model.get_layer(layer_name).output)
+    
+    # Get the layer output
+    layer_output = sub_model(img_array)
+    
+    # Compute the relevance using LRP rule
+    relevance = layer_output * model.predict(img_array)
+    return relevance
+
+def LRP_exp(file_path):
+    
+
+    # Load your trained model
+    model = load_model("trainedmodel.h5")
+
+    # Load and preprocess your input image
+    img_path = file_path
+    img = tf.keras.preprocessing.image.load_img(img_path, target_size=(128, 128))
+    img_array = tf.keras.preprocessing.image.img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0) / 255.0  # Normalize the image
+
+    # Compute LRP for each layer
+    lrp_images = {}
+    layer_names = [layer.name for layer in model.layers]
+    for layer_name in layer_names:
+        lrp_images[layer_name] = compute_lrp_for_layer(model, img_array, layer_name)
+
+    # Visualize LRP images for each layer
+    for layer_name, lrp_image in lrp_images.items():
+        # Convert the KerasTensor to a NumPy array
+        lrp_array = lrp_image.numpy()
+        
+        # If lrp_array has more than 2 dimensions, remove the batch dimension
+        if len(lrp_array.shape) == 4:
+            lrp_array = np.squeeze(lrp_array, axis=0)
+        
+        # Plot the LRP array
+        if len(lrp_array.shape) == 3:  # Check if it's a multi-channel image
+            for i in range(lrp_array.shape[-1]):
+                plt.figure()
+                plt.imshow(lrp_array[:, :, i], cmap='jet')  
+                plt.title(f"LRP for Layer: {layer_name}, Channel: {i}")
+                plt.axis("off")
+                plt.colorbar()
+                if (layer_name=='conv2d_57'):
+                    plt.savefig(f"static/{layer_name}_lrp.jpg")
+                # plt.show()
+                # conv2d_57_lrp
+                # conv2d_57_lrp
+        else:
+            plt.figure()
+            plt.imshow(lrp_array, cmap='jet')  
+            plt.title(f"LRP for Layer: {layer_name}")
+            plt.axis("off")
+            plt.colorbar()
+            # plt.show()
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080)

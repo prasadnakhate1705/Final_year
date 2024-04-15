@@ -51,7 +51,7 @@ const lime = () => {
   return (
     <div className="flex flex-col pt-10 min-h-screen py-2">
       <main className="flex flex-col w-full pt-20 flex-1 pl-20 pr-14 text-center">
-        <div className="flex flex-row">
+        <div className="flex flex-row justify-between">
           <div>
             <h1 className="text-2xl font-bold text-left">LIME</h1>
             <p className="w-[50vw] text-sm text-left leading-loose">

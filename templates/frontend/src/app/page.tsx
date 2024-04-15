@@ -56,10 +56,10 @@ export default function Home() {
             See how it works{" "}
             <PlayCircle className="ml-2 h-5 w-5 animate-bounce" />
           </Link>
-          <FileUpload router={router} />
-        </div>grad_cam_imgs
+        </div>
+        <FileUpload router={router} />
       </div>
-      <div className="h-28"></div>
+      <div className="h-[1rem]"></div>
       <Explaination />
       <h1 className="text-3xl px-20 mt-10 mb-0 font-semibold">
         Provide image detection with AI-generated explanations for users
