@@ -60,10 +60,10 @@ const Navbar = () => {
           <span>EXAI</span>
         </Link>
 
-        <NavigationMenu className="mr-4">
+        <NavigationMenu className="ml-4 lg:mr-4">
           <NavigationMenuList>
             <NavigationMenuItem>
-              <NavigationMenuTrigger>
+              <NavigationMenuTrigger className="w-[200px] lg:w-full">
                 Explainable AI Algorithms
               </NavigationMenuTrigger>
               <NavigationMenuContent>

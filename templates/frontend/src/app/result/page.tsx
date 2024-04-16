@@ -6,7 +6,6 @@ import Link from "next/link";
 import { Button, buttonVariants } from "@/components/ui/button";
 import cn from "../lib/utils";
 import { FileCheck2 } from "lucide-react";
-import PieChart from "../component/piechart"
 
 interface ResultProps {
   filename: string;
@@ -52,7 +51,6 @@ interface ResultProps {
   };
 }
 
-
 const ResultPage: React.FC = () => {
   const [data, setData] = useState<ResultProps | null>({});
 
@@ -82,20 +80,19 @@ const ResultPage: React.FC = () => {
     return <div>Loading...</div>;
   }
 
- const {
-  filename,
-  result,
-  hist_img,
-  lime_exp_filename,
-  grad_cam_imgs,
-  mfpp_exp,
-  predictionBymodel,
-  model_stats,
-  get_config,
-} = data!;
+  const {
+    filename,
+    result,
+    hist_img,
+    lime_exp_filename,
+    grad_cam_imgs,
+    mfpp_exp,
+    predictionBymodel,
+    model_stats,
+    get_config,
+  } = data!;
 
-
-return (
+  return (
     <div className="p-24 flex flex-col justify-center items-center font-semibold">
       <div className="sm:w-[800px] flex flex-col lg:flex-row gap-2 bg-gray-100 h-40 md:h-24 items-center justify-evenly rounded-lg w-[400px]">
         <h2 className="flex italic font-normal ml-2">
@@ -152,57 +149,78 @@ return (
       <div>
         <h2>Grad-CAM Images:</h2>
         <div className="flex flex-wrap">
-          {grad_cam_imgs && Object.keys(grad_cam_imgs).map((layer) => (
-            <div key={layer} className="m-2">
-              <h3>{layer}</h3>
-              <Image
-                src={`http://localhost:8080/static/${grad_cam_imgs[layer]}`}
-                alt={`${layer} Grad-CAM`}
-                width="200"
-                height="200"
-                className="shadow-xl p-4 rounded-lg"
-              />
-            </div>
-          ))
-          }
+          {grad_cam_imgs &&
+            Object.keys(grad_cam_imgs).map((layer) => (
+              <div key={layer} className="m-2">
+                <h3>{layer}</h3>
+                <Image
+                  src={`http://localhost:8080/static/${grad_cam_imgs[layer]}`}
+                  alt={`${layer} Grad-CAM`}
+                  width="200"
+                  height="200"
+                  className="shadow-xl p-4 rounded-lg"
+                />
+              </div>
+            ))}
         </div>
       </div>
       <div className="p-24 flex flex-col justify-center items-center font-semibold">
-  {/* Existing code */}
-  
-  {/* Render predictionBymodel */}
-  <h2>Prediction By Model:</h2>
-  <p>{predictionBymodel}</p>
+        {/* Existing code */}
 
-  {/* Render model_stats attributes individually */}
-  <div className="shadow-xl rounded-lg p-4">
-    <h2>Model Stats:</h2>
-    <ul>
-      <li><strong>Model:</strong> {model_stats?.Model}</li>
-      <li><strong>Accuracy (Training):</strong> {model_stats?.accuracy_train}</li>
-      <li><strong>Accuracy (Validation):</strong> {model_stats?.accuracy_val}</li>
-      <li><strong>Subset:</strong> {model_stats?.Subset}</li>
-      <li><strong>Training Time:</strong> {model_stats?.["Training time"]}</li>
-      <li><strong>Training Time (Seconds):</strong> {model_stats?.["Training in seconds"]}</li>
-      {/* Render other attributes similarly */}
-    </ul>
-  </div>
+        {/* Render predictionBymodel */}
+        <h2>Prediction By Model:</h2>
+        <p>{predictionBymodel}</p>
 
-  {/* Render get_config attributes individually */}
-  <div className="shadow-xl rounded-lg p-4">
-    <h2>Get Config:</h2>
-    <ul>
-      <li><strong>Name:</strong> {get_config?.name}</li>
-      <li><strong>Weight Decay:</strong> {get_config?.weight_decay}</li>
-      <li><strong>Clipnorm:</strong> {get_config?.clipnorm}</li>
-      <li><strong>Global Clipnorm:</strong> {get_config?.global_clipnorm}</li>
-      {/* Render other attributes similarly */}
-    </ul>
-  </div>
-</div>
-<div className="shadow-xl rounded-lg">
-<PieChart width={400} height={400} prediction={parseFloat(predictionBymodel)*100} animate />
-</div>
+        {/* Render model_stats attributes individually */}
+        <div className="shadow-xl rounded-lg p-4">
+          <h2>Model Stats:</h2>
+          <ul>
+            <li>
+              <strong>Model:</strong> {model_stats?.Model}
+            </li>
+            <li>
+              <strong>Accuracy (Training):</strong>{" "}
+              {model_stats?.accuracy_train}
+            </li>
+            <li>
+              <strong>Accuracy (Validation):</strong>{" "}
+              {model_stats?.accuracy_val}
+            </li>
+            <li>
+              <strong>Subset:</strong> {model_stats?.Subset}
+            </li>
+            <li>
+              <strong>Training Time:</strong> {model_stats?.["Training time"]}
+            </li>
+            <li>
+              <strong>Training Time (Seconds):</strong>{" "}
+              {model_stats?.["Training in seconds"]}
+            </li>
+            {/* Render other attributes similarly */}
+          </ul>
+        </div>
+
+        {/* Render get_config attributes individually */}
+        <div className="shadow-xl rounded-lg p-4">
+          <h2>Get Config:</h2>
+          <ul>
+            <li>
+              <strong>Name:</strong> {get_config?.name}
+            </li>
+            <li>
+              <strong>Weight Decay:</strong> {get_config?.weight_decay}
+            </li>
+            <li>
+              <strong>Clipnorm:</strong> {get_config?.clipnorm}
+            </li>
+            <li>
+              <strong>Global Clipnorm:</strong> {get_config?.global_clipnorm}
+            </li>
+            {/* Render other attributes similarly */}
+          </ul>
+        </div>
+      </div>
+      <div className="shadow-xl rounded-lg"></div>
     </div>
   );
 };

@@ -9,7 +9,7 @@ import Image from "next/image";
 import Explaination from "./component/Explaination";
 import Features from "./component/Features";
 import FileUpload from "./component/FileUpload";
-import {useRouter} from "next/navigation"
+import { useRouter } from "next/navigation";
 
 const words = [
   {
@@ -22,7 +22,7 @@ const words = [
 ];
 
 export default function Home() {
-  const router = useRouter()
+  const router = useRouter();
   return (
     <>
       <div className="mb-12 mt-28 sm:mt-30 px-16 flex flex-col items-center justify-center text-center">
@@ -61,7 +61,7 @@ export default function Home() {
       </div>
       <div className="h-[1rem]"></div>
       <Explaination />
-      <h1 className="text-3xl px-20 mt-10 mb-0 font-semibold">
+      <h1 className="text-3xl px-16 lg:px-20 mt-10 mb-0 font-semibold">
         Provide image detection with AI-generated explanations for users
       </h1>
       <Features />
