@@ -13,6 +13,8 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { Github } from "lucide-react";
+import Image from "next/image";
+import logo from "../../assets/logo.png";
 
 const components: { title: string; href: string; description: string }[] = [
   {
@@ -57,16 +59,17 @@ const Navbar = () => {
     <nav className="lex-no-wrap fixed top-0 h-[55px] w-full z-30 shadow-md shadow-black/5 bg-white transition-all inset-x-0">
       <div className="flex h-[55px] items-center justify-between p-4">
         <Link href="/" className="flex font-bold text-xl ml-4">
-          <span>EXAI</span>
+          <Image src={logo} height={10} width={30} /> &nbsp;
+          <span>ExAI</span>
         </Link>
 
-        <NavigationMenu className="ml-4 lg:mr-4">
+        <NavigationMenu className="ml-8 lg:mr-4">
           <NavigationMenuList>
             <NavigationMenuItem>
               <NavigationMenuTrigger className="w-[200px] lg:w-full">
                 Explainable AI Algorithms
               </NavigationMenuTrigger>
-              <NavigationMenuContent>
+              <NavigationMenuContent className="left-0">
                 <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                   <li className="row-span-3">
                     <NavigationMenuLink asChild>

@@ -5,8 +5,8 @@ import l3 from "../../assets/l3.png";
 
 const Features = () => {
   return (
-    <div className="w-full px-10 lg:px-20 py-4 flex flex-col lg:flex-row gap-[20px] select-none">
-      <div className="rounded-lg p-4 py-2 cursor-pointer hover:shadow-xl w-[413px] h-[120px] border border-gray-300 hover:border-blue-700 duration-300 transition hover:-translate-y-1 flex flex-row">
+    <div className="w-full px-10 lg:px-16 py-4 flex flex-col lg:flex-row gap-[20px] select-none">
+      <div className="rounded-lg p-2 py-2 cursor-pointer hover:shadow-xl w-[350px] sm:w-[413px] sm:h-[120px] border border-gray-300 hover:border-blue-700 duration-300 transition hover:-translate-y-1 flex flex-row">
         <div className="mt-5">
           <Image src={l1} width={120} height={40} alt="Picture of the author" />
         </div>
@@ -20,7 +20,7 @@ const Features = () => {
           </p>
         </div>
       </div>
-      <div className="rounded-lg p-4 py-2 cursor-pointer hover:shadow-xl w-[413px] h-[120px] border border-gray-300 hover:border-blue-700 duration-300 transition hover:-translate-y-1 flex flex-row">
+      <div className="rounded-lg p-2 py-2 cursor-pointer hover:shadow-xl w-[350px] sm:w-[413px] sm:h-[120px] border border-gray-300 hover:border-blue-700 duration-300 transition hover:-translate-y-1 flex flex-row">
         <div className="mt-5">
           <Image src={l2} width={100} height={40} alt="Picture of the author" />
         </div>
@@ -34,7 +34,7 @@ const Features = () => {
           </p>
         </div>
       </div>
-      <div className="rounded-lg p-4 py-2 cursor-pointer hover:shadow-xl w-[413px] h-[120px] border border-gray-300 hover:border-blue-700 duration-300 transition hover:-translate-y-1 flex flex-row">
+      <div className="rounded-lg p-2 py-2 cursor-pointer hover:shadow-xl w-[350px] sm:w-[413px] sm:h-[120px] border border-gray-300 hover:border-blue-700 duration-300 transition hover:-translate-y-1 flex flex-row">
         <div className="mt-5">
           <Image src={l3} width={130} height={40} alt="Picture of the author" />
         </div>

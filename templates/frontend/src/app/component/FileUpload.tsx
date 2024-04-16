@@ -62,9 +62,9 @@ const FileUpload = ({ router }) => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative w-[300px] lg:w-full">
       <form onSubmit={handleSubmit}>
-        <div className="p-8 bg-white rounded-xl flex flex-row">
+        <div className="p-8 bg-white rounded-xl flex flex-row shadow-lg">
           <label
             htmlFor="inputTag"
             className="border-dashed border-4 cursor-pointer rounded-xl w-[300px] h-[100px] bg-gray-50 hover:bg-gray-100 py-4 flex justify-center items-center flex-col"
