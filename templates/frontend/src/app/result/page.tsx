@@ -6,6 +6,17 @@ import Link from "next/link";
 import { Button, buttonVariants } from "@/components/ui/button";
 import cn from "../lib/utils";
 import { FileCheck2 } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../../components/ui/dialog";
+import { Loader2 } from "lucide-react";
 
 interface ResultProps {
   filename: string;
@@ -53,6 +64,31 @@ interface ResultProps {
 
 const ResultPage: React.FC = () => {
   const [data, setData] = useState<ResultProps | null>({});
+  const [modelExplainationText, setModelExplainationText] =
+    useState<string>("");
+  const lime_text = "LIME(Local Interpretable Model-Agnostic Explanations)";
+
+  const model_exp = useMutation({
+    mutationFn: async () => {
+      const response = await axios.post("/api/model_exp", {
+        model_text: lime_text,
+      });
+      return response.data;
+    },
+  });
+
+  const infoClick = () => {
+    model_exp.mutate(undefined, {
+      onSuccess: (data) => {
+        console.log("Actual data fetched in UI", modelExplainationText);
+        setModelExplainationText(data);
+      },
+      onError: (error) => {
+        console.log(error);
+        window.alert("failed to create model_Explaiantions");
+      },
+    });
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -131,13 +167,37 @@ const ResultPage: React.FC = () => {
         className="shadow-xl p-4 rounded-lg"
       />
       <h2>LIME Explanation:</h2>
-      <Image
-        src={`http://localhost:8080/static/${lime_exp_filename}`}
-        alt="LIME Explaination"
-        width="200"
-        height="200"
-        className="shadow-xl p-4 rounded-lg"
-      />
+      <div className="flex gap-2">
+        <Image
+          src={`http://localhost:8080/static/${lime_exp_filename}`}
+          alt="LIME Explaination"
+          width="200"
+          height="200"
+          className="shadow-xl p-4 rounded-lg"
+        />
+        <Dialog className="">
+          <DialogTrigger asChild>
+            <Button
+              className="bg-blue-700 w-2 h-2 p-2 mt-4 rounded-full text-white shadow-lg animate-pulse"
+              onClick={infoClick}
+            >
+              i
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="bg-white justify-center items-center text-left">
+            <DialogHeader className="justify-center items-center">
+              <DialogTitle>LIME</DialogTitle>
+            </DialogHeader>
+            <pre className="bg-gary-300 text-black text-wrap">
+              {model_exp.isPending ? (
+                <Loader2 className="text-blue-700 animate-spin w-20 h-20 mr-2" />
+              ) : (
+                modelExplainationText
+              )}
+            </pre>
+          </DialogContent>
+        </Dialog>
+      </div>
       <h2>MFPP Explanation</h2>
       <Image
         src={`http://localhost:8080/static/${mfpp_exp}`}

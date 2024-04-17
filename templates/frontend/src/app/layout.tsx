@@ -4,6 +4,7 @@ import "./globals.css";
 import cn from "./lib/utils";
 import Navbar from "./component/Navbar";
 import { Toaster } from "@/components/ui/sonner";
+import Provider from "./component/Provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,16 +20,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="light scroll-smooth">
-      <body
-        className={cn(
-          "min-hscreen font-sans antialised grainy",
-          inter.className
-        )}
-      >
-        <Navbar />
-        {children}
-        <Toaster />
-      </body>
+      <Provider>
+        <body
+          className={cn(
+            "min-hscreen font-sans antialised grainy",
+            inter.className
+          )}
+        >
+          <Navbar />
+          {children}
+          <Toaster />
+        </body>
+      </Provider>
     </html>
   );
 }
