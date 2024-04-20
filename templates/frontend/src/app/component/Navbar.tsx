@@ -40,18 +40,6 @@ const components: { title: string; href: string; description: string }[] = [
     href: "/preprocessing#img_en",
     description: "Visually or semantically separates content.",
   },
-  {
-    title: "Tabs",
-    href: "/docs/primitives/tabs",
-    description:
-      "A set of layered sections of content—known as tab panels—that are displayed one at a time.",
-  },
-  {
-    title: "Tooltip",
-    href: "/docs/primitives/tooltip",
-    description:
-      "A popup that displays information related to an element when the element receives keyboard focus or the mouse hovers over it.",
-  },
 ];
 
 const Navbar = () => {
