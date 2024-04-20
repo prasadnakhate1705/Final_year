@@ -371,8 +371,9 @@ def process_image(file_path, filename):
     grad_cam_images = {}
     layer_names = [layer.name for layer in model.layers]
     for layer_name in layer_names:
-        grad_cam_path = compute_gradcam_for_layer(model, np.expand_dims(img_array, axis=0), layer_name)
-        grad_cam_images[layer_name] = grad_cam_path
+        if (layer_name not in [ 'dense_38' ,'dense_39','dropout_19','flatten_19']):
+            grad_cam_path = compute_gradcam_for_layer(model, np.expand_dims(img_array, axis=0), layer_name)
+            grad_cam_images[layer_name] = grad_cam_path
 
     # Convert images to base64 for HTML rendering
     grad_cam_imgs = {layer: grad_cam_images[layer] for layer in grad_cam_images}
@@ -382,7 +383,7 @@ def process_image(file_path, filename):
     pred=str(prediction[0][0])
     print('------------------------')
     print("gracam" , grad_cam_imgs)
-    
+    # dense_38 ,dense_39,dropout_19,flatten_19
     
     # Assign the data to global variables
     global_data.update({
