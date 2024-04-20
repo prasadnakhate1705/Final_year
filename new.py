@@ -430,10 +430,7 @@ def process_image(file_path, filename):
             'epsilon': 1e-07,
             'amsgrad': False
         },
-        'lrp_image':
-            'conv2d_57_lrp.png'
-        
-        
+        'lrp_image': 'conv2d_57_lrp.png'
         
     })
 

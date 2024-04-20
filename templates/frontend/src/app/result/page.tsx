@@ -60,10 +60,11 @@ interface ResultProps {
     epsilon: number;
     amsgrad: boolean;
   };
+  lrp_image: string;
 }
 
 const ResultPage: React.FC = () => {
-  const [data, setData] = useState<ResultProps | null>({});
+  const [data, setData] = useState<ResultProps | null>();
   const [modelExplainationText, setModelExplainationText] =
     useState<string>("");
   const lime_text = "LIME(Local Interpretable Model-Agnostic Explanations)";
@@ -175,7 +176,7 @@ const ResultPage: React.FC = () => {
           height="200"
           className="shadow-xl p-4 rounded-lg"
         />
-        <Dialog className="">
+        <Dialog>
           <DialogTrigger asChild>
             <Button
               className="bg-blue-700 w-2 h-2 p-2 mt-4 rounded-full text-white shadow-lg animate-pulse"
@@ -280,7 +281,16 @@ const ResultPage: React.FC = () => {
           </ul>
         </div>
       </div>
-      <div className="shadow-xl rounded-lg"></div>
+      <div className="shadow-xl rounded-lg">
+        <h2>LRP</h2>
+        <Image
+          src={`http://localhost:8080/static/${lrp_image}`}
+          alt="LRP"
+          width="800"
+          height="800"
+          className="shadow-xl p-4 rounded-lg"
+        />
+      </div>
     </div>
   );
 };
