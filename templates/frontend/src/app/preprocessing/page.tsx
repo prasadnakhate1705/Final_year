@@ -7,6 +7,9 @@ import tb from "../../assets/data-preprocessing/tb.jpg";
 import histogram from "../../assets/data-preprocessing/histogram.png";
 import augment from "../../assets/data-preprocessing/augment.jpg";
 import augment_diff from "../../assets/data-preprocessing/augment_diff.png";
+import cs from "../../assets/data-preprocessing/cs.png";
+import he from "../../assets/data-preprocessing/he.png";
+import ahe from "../../assets/data-preprocessing/ahe.png";
 
 const Page = () => {
   const [activeItem, setActiveItem] = useState("cs");
@@ -17,8 +20,8 @@ const Page = () => {
   return (
     <div className="p-10 py-20 sm:p-28 items-center justify-center grid grid-col">
       {/* transformation */}
-      <div className="text-left text-sm w-[920px]">
-        <h1 className="text-xl font-bold font-quicksand text-white bg-blue-700 rounded-md w-fit p-1 ">
+      <div className="text-left text-sm w-[920px]" id="transformation">
+        <h1 className="items-center text-xl font-bold font-quicksand text-white bg-blue-700 rounded-md w-fit p-1 ">
           Data Preprocessing
         </h1>{" "}
         &nbsp;
@@ -35,7 +38,7 @@ const Page = () => {
       </div>
 
       {/* Explaination histogram */}
-      <div className="text-left text-sm w-[920px] mt-8">
+      <div className="text-left text-sm w-[920px] mt-8" id="ex_hist">
         <h1 className="text-xl font-bold text-white bg-blue-700 rounded-md w-fit p-1 ">
           Explaination Histogram
         </h1>{" "}
@@ -84,7 +87,7 @@ const Page = () => {
       </div>
 
       {/* Data Augmentation */}
-      <div className="text-left text-sm w-[920px] mt-8">
+      <div className="text-left text-sm w-[920px] mt-8" id="data_aug">
         <h1 className="text-xl font-bold text-white bg-blue-700 rounded-md w-fit p-1">
           Data Augmentation (Class imbalance problem)
         </h1>{" "}
@@ -166,7 +169,7 @@ const Page = () => {
       </div>
 
       {/* Image Enhancement */}
-      <div className="flex flex-col text-sm w-[920px] mt-8">
+      <div className="flex flex-col text-sm w-[920px] mt-8" id="img_en">
         <h1 className="text-xl font-bold text-white bg-blue-700 rounded-md w-fit p-1 ">
           Image Enhancement
         </h1>{" "}
@@ -174,7 +177,7 @@ const Page = () => {
         <nav className="flex flex-row">
           <ul className="flex flex-row w-[920px] gap-3 justify-center items-center">
             <li
-              className={`justify-self-center border-2 hover:border-b-blue-700 rounded-lg duration-200 p-2 ${
+              className={`justify-self-center border-2 cursor-pointer hover:border-b-blue-700 rounded-lg duration-200 p-2 ${
                 activeItem === "cs" ? "border-b-blue-700" : ""
               }`}
               onClick={() => handleItemClick("cs")}
@@ -182,7 +185,7 @@ const Page = () => {
               Contrast Stretching
             </li>
             <li
-              className={`justify-self-center border-2 hover:border-b-blue-700 rounded-lg duration-200 p-2 ${
+              className={`justify-self-center border-2 cursor-pointer hover:border-b-blue-700 rounded-lg duration-200 p-2 ${
                 activeItem === "he" ? "border-b-blue-700" : ""
               }`}
               onClick={() => handleItemClick("he")}
@@ -190,7 +193,7 @@ const Page = () => {
               Histogram Equalization
             </li>
             <li
-              className={`justify-self-center border-2 hover:border-b-blue-700 rounded-lg duration-200 p-2 ${
+              className={`justify-self-center border-2 cursor-pointer hover:border-b-blue-700 rounded-lg duration-200 p-2 ${
                 activeItem === "ahe" ? "border-b-blue-700" : ""
               }`}
               onClick={() => handleItemClick("ahe")}
@@ -200,9 +203,75 @@ const Page = () => {
           </ul>
         </nav>
         <div className="mt-10">
-          {activeItem === "cs" && <div> Contrast Stretching</div>}
-          {activeItem === "he" && <div>Histogram Equalization</div>}
-          {activeItem === "ahe" && <div>Adaptive Histogram Equalization</div>}
+          {activeItem === "cs" && (
+            <div>
+              {" "}
+              <h1>Contrast Stretching</h1>
+              <p>
+                Contrast Stretching is a fundamental image enhancement technique
+                aimed at improving image quality by adjusting the distribution
+                of pixel intensities. The method involves rescaling the range of
+                pixel values to span a desired range, thereby enhancing contrast
+                and making details more prominent. One of its primary advantages
+                is its ability to quickly and easily enhance image clarity,
+                which can be particularly beneficial for images with low
+                contrast. However, users should be cautious as extreme
+                stretching may result in the loss of information or introduce
+                artifacts into the image.
+              </p>
+              <div className="w-full align-self self-center mt-2">
+                <Image
+                  src={cs}
+                  alt="Contrast_Stretching"
+                  className="rounded-xl shadow-2xl"
+                />
+              </div>
+            </div>
+          )}
+          {activeItem === "he" && (
+            <div>
+              {" "}
+              <h1> Histogram Equalization</h1>
+              <p>
+                Histogram Equalization: Histogram Equalization is a technique
+                used to improve image contrast by redistributing pixel intensity
+                values. By adjusting the histogram distribution, it enhances the
+                visibility of details and makes both dark and bright areas more
+                distinguishable. While its effective in many cases, it may not
+                always produce optimal results for images with extreme lighting
+                conditions or complex color distributions.
+              </p>
+              <div className="w-full align-self self-center mt-2">
+                <Image
+                  src={he}
+                  alt="Histogram_Equalization"
+                  className="rounded-xl shadow-2xl"
+                />
+              </div>
+            </div>
+          )}
+          {activeItem === "ahe" && (
+            <div>
+              {" "}
+              <h1> Adaptive Histogram Equalization</h1>
+              <p>
+                Adaptive Histogram Equalization: Adaptive Histogram Equalization
+                enhances image contrast by adjusting pixel intensity values
+                locally. Unlike traditional methods, it operates on smaller
+                image regions independently, allowing for more targeted contrast
+                enhancement. While effective in preserving image structure,
+                careful parameter selection is essential to minimize noise and
+                ensure optimal results.
+              </p>
+              <div className="w-full align-self self-center mt-2">
+                <Image
+                  src={ahe}
+                  alt="Adaptive_Histogram_Equalization"
+                  className="rounded-xl shadow-2xl"
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

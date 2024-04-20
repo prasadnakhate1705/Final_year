@@ -18,26 +18,26 @@ import logo from "../../assets/logo.png";
 
 const components: { title: string; href: string; description: string }[] = [
   {
-    title: "Alert Dialog",
-    href: "/docs/primitives/alert-dialog",
+    title: "Data Transformation",
+    href: "/preprocessing#transformation",
     description:
       "A modal dialog that interrupts the user with important content and expects a response.",
   },
   {
-    title: "Hover Card",
-    href: "/docs/primitives/hover-card",
+    title: "Explaination Histogram",
+    href: "/preprocessing#ex_hist",
     description:
       "For sighted users to preview content available behind a link.",
   },
   {
-    title: "Progress",
-    href: "/docs/primitives/progress",
+    title: "Data Augmentation",
+    href: "/preprocessing#data_aug",
     description:
       "Displays an indicator showing the completion progress of a task, typically displayed as a progress bar.",
   },
   {
-    title: "Scroll-area",
-    href: "/docs/primitives/scroll-area",
+    title: "Image Enhancement",
+    href: "/preprocessing#img_en",
     description: "Visually or semantically separates content.",
   },
   {
