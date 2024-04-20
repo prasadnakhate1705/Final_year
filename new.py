@@ -351,7 +351,7 @@ def process_image(file_path, filename):
     
     # Prediction
     prediction = model.predict(np.expand_dims(img_array, axis=0))
-    result = "Tuberculosis" if prediction[0] >= 0.8 else "Normal"
+    result = "Tuberculosis" if prediction[0] >= 0.7 else "Normal"
 
     # Generate Histogram
     hist, bins = generate_histogram(img_array)
