@@ -430,6 +430,9 @@ def process_image(file_path, filename):
             'epsilon': 1e-07,
             'amsgrad': False
         },
+        'lrp_image':
+            'conv2d_57_lrp.png'
+        
         
         
     })
@@ -635,7 +638,8 @@ def LRP_exp(file_path):
                 plt.axis("off")
                 plt.colorbar()
                 if (layer_name=='conv2d_57'):
-                    plt.savefig(f"static/{layer_name}_lrp.jpg")
+                    plt.savefig(f"static/{layer_name}_lrp.png")
+                    print('Lrp generation done')
                 # plt.show()
                 # conv2d_57_lrp
                 # conv2d_57_lrp
