@@ -59,7 +59,7 @@ const Navbar = () => {
     <nav className="lex-no-wrap fixed top-0 h-[55px] w-full z-30 shadow-md shadow-black/5 bg-white transition-all inset-x-0">
       <div className="flex h-[55px] items-center justify-between p-4">
         <Link href="/" className="flex font-bold text-xl ml-4">
-          <Image src={logo} height={10} width={30} /> &nbsp;
+          <Image src={logo} height={10} width={30} alt="dump" /> &nbsp;
           <span>ExAI</span>
         </Link>
 
@@ -121,7 +121,7 @@ const Navbar = () => {
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <NavigationMenuTrigger>Components</NavigationMenuTrigger>
+              <NavigationMenuTrigger>How it was done!</NavigationMenuTrigger>
               <NavigationMenuContent>
                 <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
                   {components.map((component) => (

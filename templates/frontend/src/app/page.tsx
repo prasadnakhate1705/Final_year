@@ -39,17 +39,17 @@ export default function Home() {
               "mt-5 bg-blue-700 text-white duration-300"
             )}
           >
-            Get Started <ArrowRight className="ml-2 h-5 w-5" />
+            Get Started <ArrowRight className="ml-2 h-5 w-5 animate-bounce" />
           </Link>
           <Link
-            href="/dashboard"
+            href="/preprocessing"
             className={cn(
               buttonVariants(),
               "mt-5 bg-blue-700 text-white ml-2 duration-300"
             )}
           >
             See how it works{" "}
-            <PlayCircle className="ml-2 h-5 w-5 animate-bounce" />
+            <PlayCircle className="ml-2 h-5 w-5 animate-spin" />
           </Link>
         </div>
       </div>
