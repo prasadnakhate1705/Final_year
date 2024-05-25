@@ -86,7 +86,7 @@ const ResultPage: React.FC = () => {
       },
       onError: (error) => {
         console.log(error);
-        window.alert("failed to create model_Explaiantions");
+        window.alert("failed to create model_Explainations");
       },
     });
   };
@@ -283,13 +283,13 @@ const ResultPage: React.FC = () => {
       </div>
       <div className="shadow-xl rounded-lg">
         <h2>LRP</h2>
-        <Image
+        {/* <Image
           src={`http://localhost:8080/static/${lrp_image}`}
           alt="LRP"
           width="800"
           height="800"
           className="shadow-xl p-4 rounded-lg"
-        />
+        /> */}
       </div>
     </div>
   );

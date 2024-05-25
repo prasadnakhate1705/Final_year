@@ -127,13 +127,18 @@ const Navbar = () => {
           </NavigationMenuList>
         </NavigationMenu>
 
+        {/* Github link */}
         <div className="text-white">
           <Button className="w-[40px] rounded-xl shadow-lg hover:scale-110 transition duration-300">
-            <Link href="https://github.com/prasadnakhate1705/final_year/">
-              <Github />
+            <Link
+              href="https://github.com/prasadnakhate1705/final_year/"
+              rel="noopener noreferrer" target="_blank"
+            >
+                <Github />
             </Link>
           </Button>
         </div>
+
       </div>
     </nav>
   );
