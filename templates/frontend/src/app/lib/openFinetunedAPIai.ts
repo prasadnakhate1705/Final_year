@@ -1,9 +1,9 @@
 const fs = require("fs");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const genAI = new GoogleGenerativeAI("AIzaSyDCZ0URNubIUNoApVAGxbiscly4IIwIsbU ");
+const genAI = new GoogleGenerativeAI("");
 
-export async function generateModelText(model_text: string, img_path: string) {
+export async function generateModelText(img_path: string) {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 

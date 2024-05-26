@@ -70,12 +70,10 @@ const ResultPage: React.FC = () => {
   const [data, setData] = useState<ResultProps | null>();
   const [modelExplainationText, setModelExplainationText] =
     useState<string>("");
-  const lime_text = "LIME(Local Interpretable Model-Agnostic Explanations)";
 
   const model_exp = useMutation({
     mutationFn: async () => {
       const response = await axios.post("/api/model_exp", {
-        model_text: lime_text,
         img_path: lime_exp_filename,
       });
       return response.data;
