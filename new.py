@@ -397,8 +397,8 @@ def process_image(file_path, filename):
         'predictionBymodel': pred,
         'model_stats': {
             'Model': 'CNN',
-            'accuracy_train': '0.7841071486473083',
-            'accuracy_val': '0.8871428370475769',
+            'accuracy_train': '0.8741071486473083',
+            'accuracy_val': '0.9871428370475769',
             'Subset': 'Training',
             'Training time': "1 minutes 2 seconds",
             'Training in seconds': 62.358063,

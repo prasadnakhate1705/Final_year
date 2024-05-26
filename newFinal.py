@@ -88,9 +88,12 @@ def compute_gradcam_for_layer(model, img_array, layer_name, output_folder='stati
     superimposed_img = cv2.addWeighted(np.uint8(img_array[0] * 255), 0.6, heatmap, 0.4, 0)
 
     # Save the superimposed image
-    output_path = os.path.join("static/",f"{layer_name}_gradcam.png")
+    output_path = os.path.join("templates/frontend/src/app/lib/",f"{layer_name}_gradcam.png")
     print("saving image for "+ f"{layer_name}_gradcam.png")
     cv2.imwrite(output_path, superimposed_img)
+    output_path1 = os.path.join("static/",f"{layer_name}_gradcam.png")
+    print("saving image for "+ f"{layer_name}_gradcam.png")
+    cv2.imwrite(output_path1, superimposed_img)
 
     return f"{layer_name}_gradcam.png"
 
@@ -130,6 +133,7 @@ def plot_gray_scale_histogram(image, title, bins=100):
     plt.suptitle(title, fontsize=14)
     plt.tight_layout()
      
+    plt.savefig('templates/frontend/src/app/lib/histogram_output.png', bbox_inches='tight') 
     plt.savefig('static/histogram_output.png', bbox_inches='tight') 
 
 def img_and_hist(image_data, axes, bins=100):
@@ -207,8 +211,18 @@ def process_image(file_path, filename):
     lime_exp_img = generate_lime_explanation(np.expand_dims(img_array, axis=0), model)
 
     # Save Lime explanation plot as a PNG file
+    # lime_exp_filename = f"lime_exp.png"
+    # print("generating lime exp")
+    # lime_exp_path = os.path.join('templates/frontend/src/app/lib/', lime_exp_filename)
+    # print(lime_exp_path)
+    # plt.imsave(lime_exp_path, lime_exp_img)
+    # plt.savefig(f'static/{lime_exp_filename}')
+    # Save Lime explanation plot as a PNG file
     lime_exp_filename = f"lime_exp_{uuid.uuid4()}.png"
     lime_exp_path = os.path.join('static', lime_exp_filename)
+    plt.imsave(lime_exp_path, lime_exp_img)
+    # lime_exp_filename = f"lime_exp_{uuid.uuid4()}.png"
+    lime_exp_path = os.path.join('templates/frontend/src/app/lib/', lime_exp_filename)
     plt.imsave(lime_exp_path, lime_exp_img)
     
     LRP_exp(file_path)
@@ -337,7 +351,7 @@ def mfpp_exp(img_path):
     input_image = tf.keras.preprocessing.image.img_to_array(img) / 255.0  # Normalize the image
 
     # Specify the number of fragments for MFPP
-    num_fragments = 5
+    num_fragments = 15
 
     # Apply MFPP
     mfpp_predictions = apply_mfpp(model, input_image, num_fragments)
@@ -362,7 +376,9 @@ def mfpp_exp(img_path):
     of the model to fragmented perturbations in the input image.
     """
     plt.text(0, -0.3, description, horizontalalignment='left', verticalalignment='center', fontsize=12, transform=plt.gca().transAxes)
+    plt.savefig("templates/frontend/src/app/lib/mfpp_exp.png")
     plt.savefig("static/mfpp_exp.png")
+
     
     return "mfpp_exp.png"
     
@@ -425,7 +441,10 @@ def LRP_exp(file_path):
                 plt.axis("off")
                 plt.colorbar()
                 if (layer_name=='conv2d_57'):
+                    plt.savefig(f"templates/frontend/src/app/lib/{layer_name}_lrp.png")
                     plt.savefig(f"static/{layer_name}_lrp.png")
+
+                    
                     print('Lrp generation done')
                 # plt.show()
                 # conv2d_57_lrp
