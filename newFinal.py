@@ -1,8 +1,9 @@
-# main.py
+
+import os
+import uuid
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
-import os
 import numpy as np
 from PIL import Image
 from tensorflow.keras.models import load_model
@@ -11,9 +12,13 @@ import cv2
 from skimage.segmentation import mark_boundaries
 import matplotlib.pyplot as plt
 import io
-import base64
 import tensorflow as tf
 from skimage import img_as_float, exposure
+import matplotlib.pyplot as plt
+import base64
+from scipy.ndimage import binary_erosion
+from sklearn.feature_extraction import image
+
 
 
 app = Flask(__name__)
@@ -46,7 +51,6 @@ def numpize(image_path: str, img_size=(128, 128), grayscale=False):
     data = np.asarray(resized_image)
 
     return data / 255.0
-import os
 
 def compute_gradcam_for_layer(model, img_array, layer_name, output_folder='static'):
     print("inside gradcam")
@@ -90,43 +94,6 @@ def compute_gradcam_for_layer(model, img_array, layer_name, output_folder='stati
 
     return f"{layer_name}_gradcam.png"
 
-
-# def compute_gradcam_for_layer(model, img_array, layer_name):
-#     # Create a gradient model
-#     gradient_model = tf.keras.models.Model([model.inputs], [model.get_layer(layer_name).output, model.output])
-    
-#     # Calculate gradients
-#     with tf.GradientTape() as tape:
-#         last_conv_output, model_output = gradient_model(img_array)
-#         tape.watch(last_conv_output)
-#         tape.watch(model_output)
-#         pred_index = tf.argmax(model_output[0])
-#         output = model_output[:, pred_index]
-
-#     # Get the gradients
-#     grads = tape.gradient(output, last_conv_output)[0]
-
-#     # Compute the guided gradients
-#     guided_grads = (last_conv_output[0] * grads)
-
-#     # Get the heatmap
-#     heatmap = tf.reduce_mean(guided_grads, axis=-1)
-
-#     # Normalize the heatmap
-#     heatmap = np.maximum(heatmap, 0) / np.max(heatmap)
-
-#     # Resize the heatmap to the original image size
-#     heatmap = cv2.resize(heatmap, (img_array.shape[2], img_array.shape[1]))
-
-#     # Convert heatmap to RGB
-#     heatmap = np.uint8(255 * heatmap)
-#     heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
-
-#     # Blend the heatmap with the original image
-#     superimposed_img = cv2.addWeighted(np.uint8(img_array[0] * 255), 0.6, heatmap, 0.4, 0)
-
-#     return superimposed_img
-
 def plot_gray_scale_histogram(image, title, bins=100):
     '''
     Plot Gray Scale Histogram of an Image.
@@ -165,11 +132,6 @@ def plot_gray_scale_histogram(image, title, bins=100):
      
     plt.savefig('static/histogram_output.png', bbox_inches='tight') 
 
-    # plt.show()
-    
-
-
-
 def img_and_hist(image_data, axes, bins=100):
     '''
     Plot an image along with its histogram and cumulative histogram.
@@ -204,6 +166,7 @@ def img_and_hist(image_data, axes, bins=100):
     ax_cdf.set_yticks([])
 
     return
+
 def generate_histogram(image_data, bins=100):
     hist, bins = np.histogram(image_data.flatten(), bins=bins)
     return hist, bins
@@ -224,126 +187,9 @@ def generate_lime_explanation(img_array, model):
     lime_exp_img = mark_boundaries(temp / 2 + 0.5, mask)
     return lime_exp_img
 
-# @app.route('/', methods=['GET', 'POST'])
-# def upload_file():
-#     if request.method == 'POST':
-#         if 'file' not in request.files:
-#             return render_template('upload.html', error='No file part')
-        
-#         file = request.files['file']
-        
-#         if file.filename == '':
-#             return render_template('upload.html', error='No selected file')
-        
-#         if file and allowed_file(file.filename):
-#             filename = secure_filename(file.filename)
-#             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-#             file.save(file_path)
-#             return process_image(file_path, filename)
-    
-#     return render_template('upload.html')
 
 
-# def process_image(file_path, filename):
-#     # Load the uploaded image
-#     img_array = numpize(file_path, img_size=(128, 128), grayscale=False)
-    
-#     # Prediction
-#     prediction = model.predict(np.expand_dims(img_array, axis=0))
-#     result = "Tuberculosis" if prediction[0] >= 0.8 else "Normal"
 
-#     # Generate Histogram
-#     hist, bins = generate_histogram(img_array)
-
-#     # Generate LIME Explanation
-#     lime_exp_img = generate_lime_explanation(np.expand_dims(img_array, axis=0), model)
-
-# # Convert the lime_exp_img to base64 for HTML rendering
-#     lime_exp_img_base64 = cv2_to_base64(lime_exp_img)
-
-#     # Generate Grad-CAM for each layer
-#     grad_cam_images = {}
-#     layer_names = [layer.name for layer in model.layers]
-#     for layer_name in layer_names:
-#         grad_cam_img = compute_gradcam_for_layer(model, np.expand_dims(img_array, axis=0), layer_name)
-#         grad_cam_images[layer_name] = grad_cam_img
-
-#     # Convert images to base64 for HTML rendering
-#     hist_img = plot_histogram(hist, bins)
-#     # lime_exp_img = cv2_to_base64(lime_exp)
-#     grad_cam_imgs = {layer: cv2_to_base64(grad_cam_images[layer]) for layer in grad_cam_images}
-
-#     return render_template('result.html', filename=filename, result=result, hist_img=hist_img, lime_exp_img=lime_exp_img_base64, grad_cam_imgs=grad_cam_imgs)
-
-
-import uuid
-
-@app.route('/', methods=['GET', 'POST'])
-def upload_file():
-    if request.method == 'POST':
-        if 'file' not in request.files:
-            return render_template('upload.html', error='No file part')
-        
-        file = request.files['file']
-        
-        if file.filename == '':
-            return render_template('upload.html', error='No selected file')
-        
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
-            result = process_image(file_path, filename)            
-            return jsonify(result)
-    
-    return render_template('upload.html')
-
-# def process_image(file_path, filename):
-#     # Load the uploaded image
-#     img_array = numpize(file_path, img_size=(128, 128), grayscale=False)
-    
-#     # Prediction
-#     prediction = model.predict(np.expand_dims(img_array, axis=0))
-#     result = "Tuberculosis" if prediction[0] >= 0.8 else "Normal"
-
-#     # Generate Histogram
-#     hist, bins = generate_histogram(img_array)
-#     plot_gray_scale_histogram(img_array,"histogram")
-    
-#     # Generate LIME Explanation
-#     lime_exp_img = generate_lime_explanation(np.expand_dims(img_array, axis=0), model)
-
-#     # Save Lime explanation plot as a PNG file
-#     lime_exp_filename = f"lime_exp_{uuid.uuid4()}.png"
-#     lime_exp_path = os.path.join('static', lime_exp_filename)
-#     plt.imsave(lime_exp_path, lime_exp_img)
-
-#     # Generate Grad-CAM for each layer
-#     grad_cam_images = {}
-#     layer_names = [layer.name for layer in model.layers]
-#     for layer_name in layer_names:
-#         grad_cam_img = compute_gradcam_for_layer(model, np.expand_dims(img_array, axis=0), layer_name)
-#         grad_cam_images[layer_name] = grad_cam_img
-
-#     # Convert images to base64 for HTML rendering
-#     # hist_img = plot_histogram(hist, bins)
-#     grad_cam_imgs = {layer: cv2_to_base64(grad_cam_images[layer]) for layer in grad_cam_images}
-#     # print(lime_exp_path)
-    
-#     mfpp_exp_path=mfpp_exp(file_path)
-#     # return render_template('result.html', filename=filename, result=result, hist_img="histogram_output.png", lime_exp_filename=lime_exp_filename, grad_cam_imgs=grad_cam_images, mfpp_exp=mfpp_exp_path)
-#     return {
-#         'filename': filename,
-#         'result': result,
-#         'hist_img': "histogram_output.png",
-#         'lime_exp_filename': lime_exp_filename,
-#         'grad_cam_imgs': grad_cam_imgs,  # Make sure this is properly populated with image paths or data
-#         'mfpp_exp': mfpp_exp_path
-#     }
-    
-
-import os
-import uuid
 
 def process_image(file_path, filename):
     # Load the uploaded image
@@ -432,12 +278,8 @@ def process_image(file_path, filename):
         },
         'lrp_image': 'conv2d_57_lrp.png'
         
+        
     })
-
-
-@app.route('/get_global_data', methods=['GET'])
-def get_global_data():
-    return jsonify(global_data)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg'}
@@ -454,56 +296,7 @@ def plot_histogram(hist, bins):
     hist_img = base64.b64encode(buf.read()).decode('utf-8')
     plt.close()
     return hist_img
-import numpy as np
-import matplotlib.pyplot as plt
-import base64
-import io
 
-# def plot_gray_scale_histogram(image_data, title, bins=100):
-#     '''
-#     Plot Gray Scale Histogram of an Image.
-
-#     Parameters:
-#         - image_data (numpy.ndarray): Grayscale image data to plot histogram for.
-#         - title (str): Title for the histogram.
-#         - bins (int, optional): Number of bins for the histogram. Default is 100.
-
-#     Returns:
-#         str: Base64 encoded string representing the histogram image.
-
-#     This function generates a histogram for a grayscale image and returns a base64 encoded string representing the image.
-#     '''
-#     fig, ax = plt.subplots(1, 2, figsize=(15, 6))
-
-#     # Plot histogram
-#     ax.hist(image_data.flatten(), bins=bins, color='gray', alpha=0.7)
-
-#     img_and_hist(image, axes, bins)
-
-#     mean_value = np.mean(image)
-#     std_value = np.std(image)
-#     min_value = np.min(image)
-#     max_value = np.max(image)
-#     # Customize plot
-#     ax.set_title(title)
-#     ax.set_xlabel('Pixel Intensity')
-#     ax.set_ylabel('Frequency')
-
-#     # Convert plot to base64
-#     buf = io.BytesIO()
-#     plt.savefig(buf, format='png')
-#     buf.seek(0)
-#     hist_img_base64 = base64.b64encode(buf.read()).decode('utf-8')
-
-#     plt.close()
-
-#     return hist_img_base64
-
-
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.ndimage import binary_erosion
-from sklearn.feature_extraction import image
 
 # this is the supportive function for MFPP
 
@@ -583,10 +376,7 @@ def cv2_to_base64(image):
     image_base64 = image_encoded.decode('utf-8')
     return image_base64
 
-import numpy as np
-import tensorflow as tf
-from tensorflow.keras.models import load_model
-import matplotlib.pyplot as plt
+
 #LRP
 def compute_lrp_for_layer(model, img_array, layer_name):
     # Define a sub-model that outputs the activations of the specified layer
@@ -647,6 +437,34 @@ def LRP_exp(file_path):
             plt.axis("off")
             plt.colorbar()
             # plt.show()
+
+
+
+
+@app.route('/', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            return render_template('upload.html', error='No file part')
+        
+        file = request.files['file']
+        
+        if file.filename == '':
+            return render_template('upload.html', error='No selected file')
+        
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            result = process_image(file_path, filename)            
+            return jsonify(result)
+    
+    return render_template('upload.html')
+
+@app.route('/get_global_data', methods=['GET'])
+def get_global_data():
+    return jsonify(global_data)
+
 
 
 if __name__ == '__main__':
