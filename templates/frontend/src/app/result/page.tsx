@@ -17,6 +17,8 @@ import {
   DialogTrigger,
 } from "../../components/ui/dialog";
 import { Loader2 } from "lucide-react";
+import BarChartRender from "../component/BarChartRender";
+import PieChartRender from "../component/PieChartRender";
 
 interface ResultProps {
   filename: string;
@@ -28,8 +30,8 @@ interface ResultProps {
   predictionBymodel: string;
   model_stats: {
     Model: string;
-    accuracy_train: string;
-    accuracy_val: string;
+    accuracy_train: number;
+    accuracy_val: number;
     Subset: string;
     "Training time": string;
     "Training in seconds": number;
@@ -60,6 +62,7 @@ interface ResultProps {
     epsilon: number;
     amsgrad: boolean;
   };
+  lrp_image: string;
 }
 
 const ResultPage: React.FC = () => {
@@ -129,34 +132,39 @@ const ResultPage: React.FC = () => {
   } = data!;
 
   return (
-    <div className="p-24 flex flex-col justify-center items-center font-semibold">
-      <div className="sm:w-[800px] flex flex-col lg:flex-row gap-2 bg-gray-100 h-40 md:h-24 items-center justify-evenly rounded-lg w-[400px]">
-        <h2 className="flex italic font-normal ml-2">
-          <FileCheck2 />: {filename}
-        </h2>
-        <div className="flex flex-row">
-          <div className="flex flex-row lg:flex-row items-center">
-            <h2>Result: </h2> &nbsp;
-            {result === "Normal" ? (
-              <h2 className="font-semibold bg-green-300 text-white p-2 rounded-lg">
-                {result}
-              </h2>
-            ) : (
-              <h2 className="font-semibold bg-red-300 text-white p-2 rounded-lg">
-                {result}
-              </h2>
-            )}
-          </div>
-          <Link href="/">
-            <Button
-              className={cn(
-                buttonVariants(),
-                "bg-blue-700 text-white ml-2 duration-300 font-bold items-center"
+    <div className="p-24 flex flex-col justify-center items-center font-semibold gap-8">
+      <div className="grid grid-cols-2 flex flex-row gap-[30rem] items-center justify-center">
+        <div className="sm:w-[800px] flex flex-col lg:flex-row gap-2 bg-gray-100 h-40 md:h-24 items-center justify-evenly rounded-lg w-[400px]">
+          <h2 className="flex italic font-normal ml-2">
+            <FileCheck2 />: {filename}
+          </h2>
+          <div className="flex flex-row">
+            <div className="flex flex-row lg:flex-row items-center">
+              <h2>Result: </h2> &nbsp;
+              {result === "Normal" ? (
+                <h2 className="font-semibold bg-green-300 text-white p-2 rounded-lg">
+                  {result}
+                </h2>
+              ) : (
+                <h2 className="font-semibold bg-red-300 text-white p-2 rounded-lg">
+                  {result}
+                </h2>
               )}
-            >
-              &larr; Back
-            </Button>
-          </Link>
+            </div>
+            <Link href="/">
+              <Button
+                className={cn(
+                  buttonVariants(),
+                  "bg-blue-700 text-white ml-2 duration-300 font-bold items-center"
+                )}
+              >
+                &larr; Back
+              </Button>
+            </Link>
+          </div>
+        </div>
+        <div className="">
+          <Button className="">Model Information &darr;</Button>
         </div>
       </div>
       <Image
@@ -175,7 +183,7 @@ const ResultPage: React.FC = () => {
           height="200"
           className="shadow-xl p-4 rounded-lg"
         />
-        <Dialog className="">
+        <Dialog>
           <DialogTrigger asChild>
             <Button
               className="bg-blue-700 w-2 h-2 p-2 mt-4 rounded-full text-white shadow-lg animate-pulse"
@@ -224,7 +232,7 @@ const ResultPage: React.FC = () => {
             ))}
         </div>
       </div>
-      <div className="p-24 flex flex-col justify-center items-center font-semibold">
+      <div className="p-18 flex flex-col justify-center items-center font-semibold gap-4 ">
         {/* Existing code */}
 
         {/* Render predictionBymodel */}
@@ -261,26 +269,58 @@ const ResultPage: React.FC = () => {
         </div>
 
         {/* Render get_config attributes individually */}
-        <div className="shadow-xl rounded-lg p-4">
-          <h2>Get Config:</h2>
-          <ul>
-            <li>
-              <strong>Name:</strong> {get_config?.name}
-            </li>
-            <li>
-              <strong>Weight Decay:</strong> {get_config?.weight_decay}
-            </li>
-            <li>
-              <strong>Clipnorm:</strong> {get_config?.clipnorm}
-            </li>
-            <li>
-              <strong>Global Clipnorm:</strong> {get_config?.global_clipnorm}
-            </li>
-            {/* Render other attributes similarly */}
-          </ul>
+        <h2 className="text-center">Model Prediction Statistics: </h2>
+        <div className="shadow-xl rounded-lg p-4 grid grid-cols-2">
+          <BarChartRender />
+          <div className="text-center">
+            <PieChartRender
+              accuracy_train={model_stats?.accuracy_train}
+              color={"#8884d8"}
+              name={"Train"}
+            />
+            <h2>Accuracy_Training Set</h2>
+          </div>
+          <div className="text-center">
+            <PieChartRender
+              accuracy_train={model_stats?.accuracy_val}
+              color={"#923454"}
+              name={"Val"}
+            />
+            <h2>Accuracy_Validation Set</h2>
+          </div>
         </div>
       </div>
-      <div className="shadow-xl rounded-lg"></div>
+      <div className="flex gap-2">
+        <Image
+          src={`http://localhost:8080/static/conv2d_57_lrp.png`}
+          alt="LRP Explaination"
+          width="400"
+          height="400"
+          className="shadow-xl p-4 rounded-lg"
+        />
+        {/* <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              className="bg-blue-700 w-2 h-2 p-2 mt-4 rounded-full text-white shadow-lg animate-pulse"
+              onClick={infoClick}
+            >
+              i
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="bg-white justify-center items-center text-left">
+            <DialogHeader className="justify-center items-center">
+              <DialogTitle>LIME</DialogTitle>
+            </DialogHeader>
+            <pre className="bg-gary-300 text-black text-wrap">
+              {model_exp.isPending ? (
+                <Loader2 className="text-blue-700 animate-spin w-20 h-20 mr-2" />
+              ) : (
+                modelExplainationText
+              )}
+            </pre>
+          </DialogContent>
+        </Dialog> */}
+      </div>
     </div>
   );
 };

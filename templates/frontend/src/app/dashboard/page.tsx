@@ -2,7 +2,6 @@
 
 import React from "react";
 import { CardBody, CardContainer, CardItem } from "../../components/ui/3d-card";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import FileUpload from "../component/FileUpload";
 
@@ -11,7 +10,7 @@ const dashboard = () => {
   return (
     <div className="py-20">
       <div className="flex flex-col sm:flex-row justify-evenly">
-        {/* MODEL_UPLOAD */}
+        {/* MODEL_UPLOAD
         <div>
           <CardContainer className="inter-var">
             <CardBody className="bg-gray-50 relative group/card  border-black/[0.1] w-auto sm:w-[30rem] h-auto rounded-xl p-6 border  ">
@@ -40,7 +39,7 @@ const dashboard = () => {
               </div>
             </CardBody>
           </CardContainer>
-        </div>
+        </div> */}
         {/* IMAGE_UPLOAD */}
         <div>
           <CardContainer className="inter-var">
