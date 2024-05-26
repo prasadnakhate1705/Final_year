@@ -66,7 +66,7 @@ interface ResultProps {
 }
 
 const ResultPage: React.FC = () => {
-  const [data, setData] = useState<ResultProps | null>({});
+  const [data, setData] = useState<ResultProps | null>();
   const [modelExplainationText, setModelExplainationText] =
     useState<string>("");
   const lime_text = "LIME(Local Interpretable Model-Agnostic Explanations)";
@@ -88,7 +88,7 @@ const ResultPage: React.FC = () => {
       },
       onError: (error) => {
         console.log(error);
-        window.alert("failed to create model_Explaiantions");
+        window.alert("failed to create model_Explainations");
       },
     });
   };
