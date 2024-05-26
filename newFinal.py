@@ -210,14 +210,7 @@ def process_image(file_path, filename):
     # Generate LIME Explanation
     lime_exp_img = generate_lime_explanation(np.expand_dims(img_array, axis=0), model)
 
-    # Save Lime explanation plot as a PNG file
-    # lime_exp_filename = f"lime_exp.png"
-    # print("generating lime exp")
-    # lime_exp_path = os.path.join('templates/frontend/src/app/lib/', lime_exp_filename)
-    # print(lime_exp_path)
-    # plt.imsave(lime_exp_path, lime_exp_img)
-    # plt.savefig(f'static/{lime_exp_filename}')
-    # Save Lime explanation plot as a PNG file
+
     lime_exp_filename = f"lime_exp_{uuid.uuid4()}.png"
     lime_exp_path = os.path.join('static', lime_exp_filename)
     plt.imsave(lime_exp_path, lime_exp_img)
@@ -243,6 +236,9 @@ def process_image(file_path, filename):
     pred=str(prediction[0][0])
     print('------------------------')
     print("gracam" , grad_cam_imgs)
+    # imgseg=ImageSegmentation(input_shape=(128, 128))
+    # imgseg.generate_seg(file_path)
+    main_seg_gen(file_path)
     # dense_38 ,dense_39,dropout_19,flatten_19
     
     # Assign the data to global variables
@@ -290,7 +286,8 @@ def process_image(file_path, filename):
             'epsilon': 1e-07,
             'amsgrad': False
         },
-        'lrp_image': 'conv2d_57_lrp.png'
+        'lrp_image': 'conv2d_57_lrp.png',
+        'lung_seg':"lung_seg_gen.png",
         
         
     })
@@ -456,6 +453,81 @@ def LRP_exp(file_path):
             plt.axis("off")
             plt.colorbar()
             # plt.show()
+            
+
+import numpy as np
+import matplotlib.pyplot as plt
+from skimage import io, exposure
+from skimage.color import label2rgb, rgb2gray
+from skimage.filters import threshold_otsu
+from skimage.morphology import closing, square
+from skimage.segmentation import clear_border
+from skimage.measure import label, regionprops
+import matplotlib.patches as mpatches
+from PIL import Image
+
+class ImageSegmentation:
+    def __init__(self, input_shape, clip_limit=0.01, sqr_value=1):
+        self.input_shape = input_shape
+        self.clip_limit = clip_limit
+        self.sqr_value = sqr_value
+
+    def segmentize(self, X, return_only_overlay=True):
+        # Ensure the image is grayscale
+        if X.ndim == 3:
+            X = rgb2gray(X)
+        X = exposure.equalize_adapthist(X, clip_limit=self.clip_limit, nbins=256)
+        thresh = threshold_otsu(image=X, nbins=256)
+        thresh = X > thresh
+        closing_image = closing(X > thresh, square(self.sqr_value))
+        cleared = clear_border(closing_image)
+        label_image = label(cleared)
+        image_label_overlay = label2rgb(label_image, image=X, bg_label=0, bg_color=(0, 0, 0))
+        if return_only_overlay:
+            return image_label_overlay, label_image
+        else:
+            return X, thresh, closing_image, cleared, image_label_overlay, label_image
+
+    def create_rectangle_box(self, ax, label_image):
+        region_sum = 0
+        rectangles = []
+        for region in regionprops(label_image):
+            region_sum += region.area
+        region_avg = region_sum / len(regionprops(label_image))
+        for region in regionprops(label_image):
+            if region.area >= region_avg:
+                minr, minc, maxr, maxc = region.bbox
+                rect = mpatches.Rectangle((minc, minr), maxc - minc, maxr - minr, fill=False, edgecolor='purple', linewidth=1)
+                ax.add_patch(rect)
+                rectangles.append(rect)
+        return len(rectangles)
+
+    def display(self, image_path):
+        image = io.imread(image_path)
+        fig, ax = plt.subplots(figsize=(8, 8))
+        image_label_overlay, label_image = self.segmentize(image)
+        ax.imshow(image_label_overlay)
+        num_rectangles = self.create_rectangle_box(ax, label_image)
+        plt.title(f"Number of Segments: {num_rectangles}")
+        plt.axis('off')
+        # plt.savefig("")
+        # plt.show()
+        output_folder = "static"
+        os.makedirs(output_folder, exist_ok=True)  # Ensure the static folder exists
+        output_path = os.path.join(output_folder, "lung_seg_gen.png")
+        plt.savefig(output_path, bbox_inches='tight', pad_inches=0)
+        output_folder = "templates/frontend/src/app/lib/"
+        os.makedirs(output_folder, exist_ok=True)  # Ensure the static folder exists
+        output_path = os.path.join(output_folder, "lung_seg_gen.png")
+        plt.savefig(output_path, bbox_inches='tight', pad_inches=0)
+        # plt.close()
+
+def main_seg_gen(image_path):
+    input_image_path = image_path  # Replace with the path to your X-ray image
+    segmentation = ImageSegmentation(input_shape=(128, 128))
+    segmentation.display(input_image_path)
+
+
 
 
 

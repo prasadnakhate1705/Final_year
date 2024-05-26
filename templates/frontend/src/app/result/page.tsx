@@ -26,6 +26,7 @@ interface ResultProps {
   result: string;
   hist_img: string;
   lime_exp_filename: string;
+  lung_seg: string;
   grad_cam_imgs: { [key: string]: string };
   mfpp_exp: string;
   predictionBymodel: string;
@@ -68,20 +69,21 @@ interface ResultProps {
 
 const ResultPage: React.FC = () => {
   const [data, setData] = useState<ResultProps | null>();
+  const [analytics, setAnalytics] = useState<ResultProps | "hidden">("hidden");
   const [modelExplainationText, setModelExplainationText] =
     useState<string>("");
 
   const model_exp = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (filename: string) => {
       const response = await axios.post("/api/model_exp", {
-        img_path: lime_exp_filename,
+        img_path: filename,
       });
       return response.data;
     },
   });
 
-  const infoClick = () => {
-    model_exp.mutate(undefined, {
+  const infoClick = (filename: string) => {
+    model_exp.mutate(filename, {
       onSuccess: (data) => {
         console.log("Actual data fetched in UI", modelExplainationText);
         setModelExplainationText(data);
@@ -131,6 +133,10 @@ const ResultPage: React.FC = () => {
     get_config,
   } = data!;
 
+  const toggleAnalytics = () => {
+    setAnalytics((prevState) => (prevState === "hidden" ? data : "hidden"));
+  };
+
   return (
     <div className="p-24 flex flex-col font-semibold gap-8">
       <div className="grid grid-cols-2 flex-row gap-[30rem] items-center justify-center">
@@ -164,9 +170,44 @@ const ResultPage: React.FC = () => {
           </div>
         </div>
         <div className="">
-          <Button className="">Model Information &darr;</Button>
+          <Button onClick={toggleAnalytics}>Model Information &darr;</Button>
         </div>
       </div>
+      {analytics != "hidden" && (
+        <div className={`p-18 flex flex-col font-semibold gap-4`}>
+          <h2 className="text-center bg-blue-700 rounded-sm text-white w-fit p-2">
+            Model Prediction Statistics:{" "}
+          </h2>
+          <div className="shadow-xl rounded-lg p-4 grid grid-cols-2">
+            <BarChartRender />
+            <div className="text-center">
+              <PieChartRender
+                accuracy_train={model_stats?.accuracy_train}
+                color={"#8884d8"}
+                name={"Train"}
+              />
+              <h2>Accuracy_Training Set</h2>
+            </div>
+            <div className="text-center">
+              <PieChartRender
+                accuracy_train={model_stats?.accuracy_val}
+                color={"#923454"}
+                name={"Val"}
+              />
+              <h2>Accuracy_Validation Set</h2>
+            </div>
+            <div className="ml-28">
+              <RadialChartRender />
+              <h2 className="ml-24">Accuracy_Validation Set</h2>
+            </div>
+          </div>
+          {/* Render predictionBymodel */}
+          <h2 className="bg-blue-700 rounded-sm text-white w-fit p-2">
+            Prediction By Model:
+          </h2>
+          <p>{predictionBymodel}</p>
+        </div>
+      )}
       <Image
         src={`http://localhost:8080/static/${hist_img}`}
         alt="Histogram"
@@ -176,28 +217,129 @@ const ResultPage: React.FC = () => {
       />
       <div className="grid grid-cols-2 w-fit">
         <div className="flex flex-col gap-2">
-          <h2 className="bg-blue-700 rounded-sm text-white w-fit p-2">
-            LIME Explanation:
-          </h2>
+          <div className="flex flex-row gap-2">
+            <h2 className="bg-blue-700 rounded-sm text-white w-fit p-2">
+              LIME Explanation:
+            </h2>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  className="bg-blue-700 w-4 h-4 p-3 mt-2 rounded-full text-white shadow-lg animate-pulse"
+                  onClick={() => infoClick(data.lung_seg)}
+                >
+                  i
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-white justify-center items-center text-left">
+                <DialogHeader className="justify-center items-center">
+                  <DialogTitle>LIME</DialogTitle>
+                </DialogHeader>
+                <pre className="bg-gary-300 text-black text-wrap">
+                  {model_exp.isPending ? (
+                    <Loader2 className="text-blue-700 animate-spin w-20 h-20 mr-2" />
+                  ) : (
+                    modelExplainationText
+                  )}
+                </pre>
+              </DialogContent>
+            </Dialog>
+          </div>
           <Image
-            src={`http://localhost:8080/static/${lime_exp_filename}`}
+            src={`http://localhost:8080/static/lung_seg_gen.png`}
             alt="LIME Explaination"
             width="300"
             height="300"
             className="shadow-xl p-4 rounded-lg"
           />
+        </div>
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-row gap-2">
+            <h2 className="bg-blue-700 rounded-sm text-white w-fit p-2">
+              LRP Explanation
+            </h2>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  className="bg-blue-700 w-4 h-4 p-3 mt-2 rounded-full text-white shadow-lg animate-pulse"
+                  onClick={() => infoClick(data.lrp_image)}
+                >
+                  i
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-white justify-center items-center text-left">
+                <DialogHeader className="justify-center items-center">
+                  <DialogTitle>LRP</DialogTitle>
+                </DialogHeader>
+                <pre className="bg-gary-300 text-black text-wrap">
+                  {model_exp.isPending ? (
+                    <Loader2 className="text-blue-700 animate-spin w-20 h-20 mr-2" />
+                  ) : (
+                    modelExplainationText
+                  )}
+                </pre>
+              </DialogContent>
+            </Dialog>
+          </div>
+          <Image
+            src={`http://localhost:8080/static/conv2d_57_lrp.png`}
+            alt="LRP Explaination"
+            width="400"
+            height="400"
+            className="shadow-xl p-4 rounded-lg"
+          />
+        </div>
+      </div>
+      <div className="flex flex-row gap-2">
+        <h2 className="bg-blue-700 rounded-sm text-white w-fit p-2">
+          MFPP Explanation
+        </h2>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              className="bg-blue-700 w-4 h-4 p-3 mt-2 rounded-full text-white shadow-lg animate-pulse"
+              onClick={() => infoClick(data.mfpp_exp)}
+            >
+              i
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="bg-white justify-center items-center text-left">
+            <DialogHeader className="justify-center items-center">
+              <DialogTitle>MFPP</DialogTitle>
+            </DialogHeader>
+            <pre className="bg-gary-300 text-black text-wrap">
+              {model_exp.isPending ? (
+                <Loader2 className="text-blue-700 animate-spin w-20 h-20 mr-2" />
+              ) : (
+                modelExplainationText
+              )}
+            </pre>
+          </DialogContent>
+        </Dialog>
+      </div>
+      <Image
+        src={`http://localhost:8080/static/${mfpp_exp}`}
+        alt="MFPP Explanation"
+        width="800"
+        height="800"
+        className="shadow-xl p-4 rounded-lg"
+      />
+      <div>
+        <div className="flex flex-row gap-2">
+          <h2 className="bg-blue-700 rounded-sm text-white w-fit p-2">
+            Grad-CAM Images:
+          </h2>
           <Dialog>
             <DialogTrigger asChild>
               <Button
-                className="bg-blue-700 w-2 h-2 p-2 mt-4 rounded-full text-white shadow-lg animate-pulse"
-                onClick={infoClick}
+                className="bg-blue-700 w-4 h-4 p-3 mt-2 rounded-full text-white shadow-lg animate-pulse"
+                onClick={() => infoClick(data.grad_cam_imgs[0])}
               >
                 i
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-white justify-center items-center text-left">
               <DialogHeader className="justify-center items-center">
-                <DialogTitle>LIME</DialogTitle>
+                <DialogTitle>MFPP</DialogTitle>
               </DialogHeader>
               <pre className="bg-gary-300 text-black text-wrap">
                 {model_exp.isPending ? (
@@ -209,55 +351,6 @@ const ResultPage: React.FC = () => {
             </DialogContent>
           </Dialog>
         </div>
-        <div className="flex flex-col gap-2">
-          <h2 className="bg-blue-700 rounded-sm text-white w-fit p-2">
-            LRP Explanation
-          </h2>
-          <Image
-            src={`http://localhost:8080/static/conv2d_57_lrp.png`}
-            alt="LRP Explaination"
-            width="400"
-            height="400"
-            className="shadow-xl p-4 rounded-lg"
-          />
-          {/* <Dialog>
-          <DialogTrigger asChild>
-            <Button
-              className="bg-blue-700 w-2 h-2 p-2 mt-4 rounded-full text-white shadow-lg animate-pulse"
-              onClick={infoClick}
-            >
-              i
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-white justify-center items-center text-left">
-            <DialogHeader className="justify-center items-center">
-              <DialogTitle>LIME</DialogTitle>
-            </DialogHeader>
-            <pre className="bg-gary-300 text-black text-wrap">
-              {model_exp.isPending ? (
-                <Loader2 className="text-blue-700 animate-spin w-20 h-20 mr-2" />
-              ) : (
-                modelExplainationText
-              )}
-            </pre>
-          </DialogContent>
-        </Dialog> */}
-        </div>
-      </div>
-      <h2 className="bg-blue-700 rounded-sm text-white w-fit p-2">
-        MFPP Explanation
-      </h2>
-      <Image
-        src={`http://localhost:8080/static/${mfpp_exp}`}
-        alt="MFPP Explanation"
-        width="800"
-        height="800"
-        className="shadow-xl p-4 rounded-lg"
-      />
-      <div>
-        <h2 className="bg-blue-700 rounded-sm text-white w-fit p-2">
-          Grad-CAM Images:
-        </h2>
         <div className="flex flex-wrap">
           {grad_cam_imgs &&
             Object.keys(grad_cam_imgs).map((layer) => (
@@ -272,43 +365,6 @@ const ResultPage: React.FC = () => {
                 />
               </div>
             ))}
-        </div>
-      </div>
-      <div className="p-18 flex flex-col font-semibold gap-4 ">
-        {/* Existing code */}
-
-        {/* Render predictionBymodel */}
-        <h2 className="bg-blue-700 rounded-sm text-white w-fit p-2">
-          Prediction By Model:
-        </h2>
-        <p>{predictionBymodel}</p>
-
-        {/* Render get_config attributes individually */}
-        <h2 className="text-center bg-blue-700 rounded-sm text-white w-fit p-2">
-          Model Prediction Statistics:{" "}
-        </h2>
-        <div className="shadow-xl rounded-lg p-4 grid grid-cols-2">
-          <BarChartRender />
-          <div className="text-center">
-            <PieChartRender
-              accuracy_train={model_stats?.accuracy_train}
-              color={"#8884d8"}
-              name={"Train"}
-            />
-            <h2>Accuracy_Training Set</h2>
-          </div>
-          <div className="text-center">
-            <PieChartRender
-              accuracy_train={model_stats?.accuracy_val}
-              color={"#923454"}
-              name={"Val"}
-            />
-            <h2>Accuracy_Validation Set</h2>
-          </div>
-          <div className="ml-28">
-            <RadialChartRender />
-            <h2 className="ml-24">Accuracy_Validation Set</h2>
-          </div>
         </div>
       </div>
     </div>
