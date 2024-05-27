@@ -20,6 +20,18 @@ from scipy.ndimage import binary_erosion
 from sklearn.feature_extraction import image
 
 
+from PIL import Image
+import numpy as np
+import matplotlib.pyplot as plt
+from skimage.segmentation import slic, mark_boundaries
+from lime import lime_image
+from sklearn.linear_model import Ridge
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing import image as keras_image
+from tensorflow.keras.applications.imagenet_utils import preprocess_input
+
+
+
 
 app = Flask(__name__)
 CORS(app)
@@ -175,21 +187,108 @@ def generate_histogram(image_data, bins=100):
     hist, bins = np.histogram(image_data.flatten(), bins=bins)
     return hist, bins
 
-def generate_lime_explanation(img_array, model):
-    # Define LIME explainer for images
+
+from PIL import Image
+import numpy as np
+import matplotlib.pyplot as plt
+from skimage.segmentation import slic, mark_boundaries
+from lime import lime_image
+from sklearn.linear_model import Ridge
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing import image as keras_image
+from tensorflow.keras.applications.imagenet_utils import preprocess_input
+
+def predict_fn(images):
+    return model.predict(images)
+
+def perturb_image(image, segments, perturbation_mask):
+        perturbed_image = image.copy()
+        for segment_idx in np.unique(segments):
+            if perturbation_mask[segment_idx] == 0:
+                perturbed_image[segments == segment_idx] = [0, 0, 0]  # Hide superpixel (black it out)
+        return perturbed_image
+def generate_lime_EXP(model_path ,image_path):
+    # Step 1: Load the CNN model
+    model = load_model(model_path)
+    
+
+    # Step 2: Load and preprocess the image
+    img_path = image_path
+    img = Image.open(img_path)
+    img = img.convert('RGB')  # Ensure the image is in RGB format
+    img = img.resize((128, 128))  # Resize the image to match the model's input shape
+    img_array = keras_image.img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0)
+    img_array = preprocess_input(img_array)
+
+    # Step 3: Initialize LIME Image Explainer
     explainer = lime_image.LimeImageExplainer()
 
-    # Make predictions
-    prediction = model.predict(img_array)
-    # print("Model Prediction:", prediction)
+    # Step 4: Define the Prediction Function
 
-    # Explain predictions for the image
-    explanation = explainer.explain_instance(img_array[0], model.predict, top_labels=1, hide_color=0, num_samples=1000)
+    # Step 5: Generate Explanation
+    explanation = explainer.explain_instance(img_array[0], predict_fn, top_labels=5, hide_color=0, num_samples=1000)
 
-    # Show the top regions contributing to the prediction
-    temp, mask = explanation.get_image_and_mask(explanation.top_labels[0], positive_only=True, num_features=5, hide_rest=False)
-    lime_exp_img = mark_boundaries(temp / 2 + 0.5, mask)
-    return lime_exp_img
+    # Step 6: Superpixel Segmentation
+    segments = slic(img_array[0], n_segments=50, compactness=10)
+
+    # Step 7: Perturb the Image
+
+
+    num_samples = 1000
+    perturbations = np.random.binomial(1, 0.5, size=(num_samples, np.max(segments) + 1))
+
+    perturbed_images = []
+    for perturbation in perturbations:
+        perturbed_image = perturb_image(img_array[0], segments, perturbation)
+        perturbed_images.append(perturbed_image)
+    perturbed_images = np.array(perturbed_images)
+
+    # Step 8: Model Predictions on Perturbed Images
+    predictions = predict_fn(perturbed_images)
+
+    # Step 9: Local Interpretable Model
+    X = perturbations
+    class_of_interest = np.argmax(model.predict(img_array))
+    y = predictions[:, class_of_interest]
+    interpretable_model = Ridge(alpha=1.0)
+    interpretable_model.fit(X, y)
+
+    # Step 10: Importance Scores
+    importance_scores = interpretable_model.coef_
+
+    # Step 11: Visualize the Explanation
+    top_superpixels = np.argsort(importance_scores)[-10:]  # Adjust the number as needed
+    mask = np.zeros_like(segments)
+    for superpixel in top_superpixels:
+        mask[segments == superpixel] = 1
+
+    highlighted_image = mark_boundaries(img_array[0], mask, color=(1, 0, 0))
+
+    plt.imshow(highlighted_image)
+    plt.axis('off')  # Hide the axes for better visual quality
+    print('saving in static')
+    plt.savefig('static/lime_expd.png', bbox_inches='tight', pad_inches=0)
+    print('savimg  in templates')
+    plt.savefig('templates/frontend/src/app/lib/lime_expd.png', bbox_inches='tight', pad_inches=0)
+    plt.close()
+# plt.show()
+
+# def generate_lime_explanation(img_array, model):
+#     # Define LIME explainer for images
+#     explainer = lime_image.LimeImageExplainer()
+
+#     # Make predictions
+#     prediction = model.predict(img_array)
+#     # print("Model Prediction:", prediction)
+
+#     # Explain predictions for the image
+#     explanation = explainer.explain_instance(img_array[0], model.predict, top_labels=1, hide_color=0, num_samples=1000)
+
+#     # Show the top regions contributing to the prediction
+#     temp, mask = explanation.get_image_and_mask(explanation.top_labels[0], positive_only=True, num_features=5, hide_rest=False)
+#     lime_exp_img = mark_boundaries(temp / 2 + 0.5, mask)
+#     return lime_exp_img
 
 
 
@@ -207,16 +306,9 @@ def process_image(file_path, filename):
     hist, bins = generate_histogram(img_array)
     plot_gray_scale_histogram(img_array, "histogram")
     
-    # Generate LIME Explanation
-    lime_exp_img = generate_lime_explanation(np.expand_dims(img_array, axis=0), model)
-
-
-    lime_exp_filename = f"lime_exp_{uuid.uuid4()}.png"
-    lime_exp_path = os.path.join('static', lime_exp_filename)
-    plt.imsave(lime_exp_path, lime_exp_img)
-    # lime_exp_filename = f"lime_exp_{uuid.uuid4()}.png"
-    lime_exp_path = os.path.join('templates/frontend/src/app/lib/', lime_exp_filename)
-    plt.imsave(lime_exp_path, lime_exp_img)
+    print('generating lime exp')
+    generate_lime_EXP("trainedmodel.h5",file_path)
+    
     
     LRP_exp(file_path)
 
@@ -236,10 +328,8 @@ def process_image(file_path, filename):
     pred=str(prediction[0][0])
     print('------------------------')
     print("gracam" , grad_cam_imgs)
-    # imgseg=ImageSegmentation(input_shape=(128, 128))
-    # imgseg.generate_seg(file_path)
+
     main_seg_gen(file_path)
-    # dense_38 ,dense_39,dropout_19,flatten_19
     
     # Assign the data to global variables
     global_data.update({
@@ -247,7 +337,7 @@ def process_image(file_path, filename):
         'filename': filename,
         'result': result,
         'hist_img': "histogram_output.png",
-        'lime_exp_filename': lime_exp_filename,
+        'lime_exp_filename': "lime_expd.png",
         'grad_cam_imgs': grad_cam_imgs,
         'mfpp_exp': mfpp_exp_path,
         'predictionBymodel': pred,

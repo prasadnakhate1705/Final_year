@@ -1,7 +1,7 @@
 const fs = require("fs");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const genAI = new GoogleGenerativeAI("api_key");
+const genAI = new GoogleGenerativeAI("AIzaSyAtXw97py_3Uz450ly5Vfu5poLuSxuJQjE");
 
 export async function generateModelText(img_path: string) {
   try {

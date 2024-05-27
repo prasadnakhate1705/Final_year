@@ -5,9 +5,83 @@ import gradcam_img from "../../../assets/gradcam.webp";
 import { CopyBlock } from "react-code-blocks";
 import { Copy } from "lucide-react";
 
-const code = `import pandas as pd;
-df = pd.read_csv('some_random.csv');
-df.head(5)`;
+const code = `import numpy as np
+import tensorflow as tf
+import matplotlib.pyplot as plt
+import cv2
+from tensorflow.keras.applications.vgg16 import VGG16, preprocess_input, decode_predictions
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.models import Model
+
+# Load a pre-trained VGG16 model
+model = VGG16(weights='imagenet')
+model.summary()  # Print model architecture
+
+# Load and preprocess the image
+img_path = 'elephant.jpg'  # Replace with the path to your image
+img = image.load_img(img_path, target_size=(224, 224))
+x = image.img_to_array(img)
+x = np.expand_dims(x, axis=0)
+x = preprocess_input(x)
+
+# Make predictions
+preds = model.predict(x)
+print('Predicted:', decode_predictions(preds, top=3)[0])
+
+# Get the index of the class with the highest predicted probability
+class_idx = np.argmax(preds[0])
+class_output = model.output[:, class_idx]
+
+# Get the last convolutional layer
+last_conv_layer = model.get_layer('block5_conv3')
+
+# Compute the gradient of the class output with respect to the feature map
+grads = tf.gradients(class_output, last_conv_layer.output)[0]
+
+# Compute the mean intensity of the gradients along the channel dimension
+pooled_grads = tf.reduce_mean(grads, axis=(0, 1, 2))
+
+# Define a function to get the values of the pooled gradients and the feature map
+iterate = tf.function(lambda: (pooled_grads, last_conv_layer.output))
+pooled_grads_value, conv_layer_output_value = iterate()
+
+# Multiply each channel in the feature map by the mean intensity of the gradients
+for i in range(pooled_grads_value.shape[-1]):
+    conv_layer_output_value[0, :, :, i] *= pooled_grads_value[i]
+
+# Average the feature map along the channel dimension to get the heatmap
+heatmap = np.mean(conv_layer_output_value[0], axis=-1)
+
+# Normalize the heatmap to the range [0, 1]
+heatmap = np.maximum(heatmap, 0)
+heatmap /= np.max(heatmap)
+
+# Display the heatmap
+plt.matshow(heatmap)
+plt.show()
+
+# Load the original image
+img = cv2.imread(img_path)
+
+# Resize the heatmap to match the original image size
+heatmap = cv2.resize(heatmap, (img.shape[1], img.shape[0]))
+
+# Convert the heatmap to RGB
+heatmap = np.uint8(255 * heatmap)
+
+# Apply the heatmap to the original image
+heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
+superimposed_img = heatmap * 0.4 + img
+
+# Save the superimposed image
+output_path = 'elephant_cam.jpg'
+cv2.imwrite(output_path, superimposed_img)
+
+# Display the superimposed image
+plt.imshow(cv2.cvtColor(superimposed_img, cv2.COLOR_BGR2RGB))
+plt.axis('off')
+plt.show()
+`;
 const language = "python";
 const myCustomTheme = {
   lineNumberColor: "#ccc",
@@ -53,7 +127,7 @@ const gradcam = () => {
       <main className="flex flex-col w-full pt-20 flex-1 px-20 text-center">
         <div className="flex flex-row">
           <div>
-            <h1 className="text-2xl font-bold text-left">LIME</h1>
+            <h1 className="text-2xl font-bold text-left">GradCAM</h1>
             <p className="w-[50vw] text-left text-sm leading-loose">
               As a deep learning developer, understanding the inner workings of
               your models is crucial for building accurate and reliable systems.

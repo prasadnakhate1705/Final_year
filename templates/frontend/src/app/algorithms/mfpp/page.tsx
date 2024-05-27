@@ -5,9 +5,32 @@ import lime_img from "../../../assets/lime.png";
 import { CopyBlock } from "react-code-blocks";
 import { Copy } from "lucide-react";
 
-const code = `import pandas as pd;
-df = pd.read_csv('some_random.csv');
-df.head(5)`;
+const code = `import numpy as np
+import tensorflow as tf
+import matplotlib.pyplot as plt
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.applications.vgg16 import VGG16, preprocess_input, decode_predictions
+
+# Load a pre-trained VGG16 model
+model = VGG16(weights='imagenet')
+
+# Load and preprocess the image
+img_path = 'elephant.jpg'  # Replace with the path to your image
+img = image.load_img(img_path, target_size=(224, 224))
+x = image.img_to_array(img)
+x = np.expand_dims(x, axis=0)
+x = preprocess_input(x)
+
+# Make predictions
+preds = model.predict(x)
+print('Predicted:', decode_predictions(preds, top=3)[0])
+
+# Perform MFPP
+# (Replace this part with your implementation of MFPP algorithm)
+
+# Visualize the MFPP explanation
+# (Replace this part with your code to visualize the MFPP explanation)
+`;
 const language = "python";
 const myCustomTheme = {
   lineNumberColor: "#ccc",
@@ -53,7 +76,7 @@ const mfpp = () => {
       <main className="flex flex-col w-full pt-20 flex-1 pl-20 pr-14 text-center">
         <div className="flex flex-row">
           <div>
-            <h1 className="text-2xl font-bold text-left">LIME</h1>
+            <h1 className="text-2xl font-bold text-left">MFPP</h1>
             <p className="w-[50vw] text-sm text-left leading-loose">
               LIME, known as Local Interpretable Model-agnostic Explanations, is
               a method designed to shed light on the predictions made by machine

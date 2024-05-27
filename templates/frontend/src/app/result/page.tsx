@@ -20,6 +20,7 @@ import { Loader2 } from "lucide-react";
 import BarChartRender from "../component/BarChartRender";
 import PieChartRender from "../component/PieChartRender";
 import RadialChartRender from "../component/RadialChartRender";
+import RadarChartRender from "../component/RadarChartRender";
 
 interface ResultProps {
   filename: string;
@@ -138,7 +139,7 @@ const ResultPage: React.FC = () => {
   };
 
   return (
-    <div className="p-24 flex flex-col font-semibold gap-8">
+    <div className="p-24 flex flex-col font-semibold gap-8 items-center justify-center">
       <div className="grid grid-cols-2 flex-row gap-[30rem] items-center justify-center">
         <div className="sm:w-[800px] flex flex-col lg:flex-row gap-2 bg-gray-100 h-40 md:h-24 items-center justify-evenly rounded-lg w-[400px]">
           <h2 className="flex italic font-normal ml-2">
@@ -169,8 +170,10 @@ const ResultPage: React.FC = () => {
             </Link>
           </div>
         </div>
-        <div className="">
-          <Button onClick={toggleAnalytics}>Model Information &darr;</Button>
+        <div>
+          <Button onClick={toggleAnalytics} className="hover:bg-blue-700">
+            Model Information &darr;
+          </Button>
         </div>
       </div>
       {analytics != "hidden" && (
@@ -182,19 +185,21 @@ const ResultPage: React.FC = () => {
             <BarChartRender />
             <div className="text-center">
               <PieChartRender
-                accuracy_train={model_stats?.accuracy_train}
-                color={"#8884d8"}
-                name={"Train"}
-              />
-              <h2>Accuracy_Training Set</h2>
-            </div>
-            <div className="text-center">
-              <PieChartRender
-                accuracy_train={model_stats?.accuracy_val}
+                accuracy_train={
+                  (model_stats.TP + model_stats.TN) /
+                  (model_stats.TP +
+                    model_stats.FP +
+                    model_stats.TN +
+                    model_stats.FN)
+                }
                 color={"#923454"}
-                name={"Val"}
+                name={"Model"}
               />
               <h2>Accuracy_Validation Set</h2>
+            </div>
+            <div className="text-center">
+              <RadarChartRender />
+              <h2>Metrics</h2>
             </div>
             <div className="ml-28">
               <RadialChartRender />
@@ -215,114 +220,91 @@ const ResultPage: React.FC = () => {
         height="800"
         className="shadow-xl p-4 rounded-lg"
       />
-      <div className="grid grid-cols-2 w-fit">
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-row gap-2">
-            <h2 className="bg-blue-700 rounded-sm text-white w-fit p-2">
-              LIME Explanation:
-            </h2>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button
-                  className="bg-blue-700 w-4 h-4 p-3 mt-2 rounded-full text-white shadow-lg animate-pulse"
-                  onClick={() => infoClick(data.lung_seg)}
-                >
-                  i
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="bg-white justify-center items-center text-left">
-                <DialogHeader className="justify-center items-center">
-                  <DialogTitle>LIME</DialogTitle>
-                </DialogHeader>
-                <pre className="bg-gary-300 text-black text-wrap">
-                  {model_exp.isPending ? (
-                    <Loader2 className="text-blue-700 animate-spin w-20 h-20 mr-2" />
-                  ) : (
-                    modelExplainationText
-                  )}
-                </pre>
-              </DialogContent>
-            </Dialog>
-          </div>
-          <Image
-            src={`http://localhost:8080/static/lung_seg_gen.png`}
-            alt="LIME Explaination"
-            width="300"
-            height="300"
-            className="shadow-xl p-4 rounded-lg"
-          />
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-row gap-2">
+          <h2 className="bg-blue-700 rounded-sm text-white w-fit p-2">
+            LIME Explanation:
+          </h2>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                className="bg-blue-700 w-4 h-4 p-3 mt-2 rounded-full text-white shadow-lg animate-pulse"
+                onClick={() => infoClick(data.lung_seg)}
+              >
+                i
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-white justify-center items-center text-left">
+              <DialogHeader className="justify-center items-center">
+                <DialogTitle>LIME</DialogTitle>
+              </DialogHeader>
+              <pre className="bg-gary-300 text-black text-wrap">
+                {model_exp.isPending ? (
+                  <Loader2 className="text-blue-700 animate-spin w-20 h-20 mr-2" />
+                ) : (
+                  modelExplainationText
+                )}
+              </pre>
+            </DialogContent>
+          </Dialog>
         </div>
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-row gap-2">
-            <h2 className="bg-blue-700 rounded-sm text-white w-fit p-2">
-              LRP Explanation
-            </h2>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button
-                  className="bg-blue-700 w-4 h-4 p-3 mt-2 rounded-full text-white shadow-lg animate-pulse"
-                  onClick={() => infoClick(data.lrp_image)}
-                >
-                  i
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="bg-white justify-center items-center text-left">
-                <DialogHeader className="justify-center items-center">
-                  <DialogTitle>LRP</DialogTitle>
-                </DialogHeader>
-                <pre className="bg-gary-300 text-black text-wrap">
-                  {model_exp.isPending ? (
-                    <Loader2 className="text-blue-700 animate-spin w-20 h-20 mr-2" />
-                  ) : (
-                    modelExplainationText
-                  )}
-                </pre>
-              </DialogContent>
-            </Dialog>
+        <div className="grid grid-cols-3">
+          <div className="w-[600px]">
+            <Image
+              src={`http://localhost:8080/static/lime_expd.png`}
+              alt="LIME_expd"
+              width="1000"
+              height="1000"
+              className="shadow-xl p-4 rounded-lg"
+            />
           </div>
-          <Image
-            src={`http://localhost:8080/static/conv2d_57_lrp.png`}
-            alt="LRP Explaination"
-            width="400"
-            height="400"
-            className="shadow-xl p-4 rounded-lg"
-          />
+          <div className="ml-44">
+            <Image
+              src={`http://localhost:8080/static/lung_seg_gen.png`}
+              alt="LIME Explaination"
+              width="370"
+              height="370"
+              className="shadow-xl p-4 rounded-lg"
+            />
+          </div>
+          <div className="flex flex-col gap-2 ml-32">
+            <div className="flex flex-row gap-2">
+              <h2 className="bg-blue-700 rounded-sm text-white w-fit p-2">
+                LRP Explanation
+              </h2>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    className="bg-blue-700 w-4 h-4 p-3 mt-2 rounded-full text-white shadow-lg animate-pulse"
+                    onClick={() => infoClick(data.lrp_image)}
+                  >
+                    i
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-white justify-center items-center text-left">
+                  <DialogHeader className="justify-center items-center">
+                    <DialogTitle>LRP</DialogTitle>
+                  </DialogHeader>
+                  <pre className="bg-gary-300 text-black text-wrap">
+                    {model_exp.isPending ? (
+                      <Loader2 className="text-blue-700 animate-spin w-20 h-20 mr-2" />
+                    ) : (
+                      modelExplainationText
+                    )}
+                  </pre>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <Image
+              src={`http://localhost:8080/static/conv2d_57_lrp.png`}
+              alt="LRP Explaination"
+              width="350"
+              height="350"
+              className="shadow-xl p-4 rounded-lg"
+            />
+          </div>
         </div>
       </div>
-      <div className="flex flex-row gap-2">
-        <h2 className="bg-blue-700 rounded-sm text-white w-fit p-2">
-          MFPP Explanation
-        </h2>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button
-              className="bg-blue-700 w-4 h-4 p-3 mt-2 rounded-full text-white shadow-lg animate-pulse"
-              onClick={() => infoClick(data.mfpp_exp)}
-            >
-              i
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-white justify-center items-center text-left">
-            <DialogHeader className="justify-center items-center">
-              <DialogTitle>MFPP</DialogTitle>
-            </DialogHeader>
-            <pre className="bg-gary-300 text-black text-wrap">
-              {model_exp.isPending ? (
-                <Loader2 className="text-blue-700 animate-spin w-20 h-20 mr-2" />
-              ) : (
-                modelExplainationText
-              )}
-            </pre>
-          </DialogContent>
-        </Dialog>
-      </div>
-      <Image
-        src={`http://localhost:8080/static/${mfpp_exp}`}
-        alt="MFPP Explanation"
-        width="800"
-        height="800"
-        className="shadow-xl p-4 rounded-lg"
-      />
       <div>
         <div className="flex flex-row gap-2">
           <h2 className="bg-blue-700 rounded-sm text-white w-fit p-2">
@@ -367,6 +349,40 @@ const ResultPage: React.FC = () => {
             ))}
         </div>
       </div>
+      <div className="flex flex-row gap-2">
+        <h2 className="bg-blue-700 rounded-sm text-white w-fit p-2">
+          MFPP Explanation
+        </h2>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              className="bg-blue-700 w-4 h-4 p-3 mt-2 rounded-full text-white shadow-lg animate-pulse"
+              onClick={() => infoClick(data.mfpp_exp)}
+            >
+              i
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="bg-white justify-center items-center text-left">
+            <DialogHeader className="justify-center items-center">
+              <DialogTitle>MFPP</DialogTitle>
+            </DialogHeader>
+            <pre className="bg-gary-300 text-black text-wrap">
+              {model_exp.isPending ? (
+                <Loader2 className="text-blue-700 animate-spin w-20 h-20 mr-2" />
+              ) : (
+                modelExplainationText
+              )}
+            </pre>
+          </DialogContent>
+        </Dialog>
+      </div>
+      <Image
+        src={`http://localhost:8080/static/${mfpp_exp}`}
+        alt="MFPP Explanation"
+        width="800"
+        height="800"
+        className="shadow-xl p-4 rounded-lg"
+      />
     </div>
   );
 };

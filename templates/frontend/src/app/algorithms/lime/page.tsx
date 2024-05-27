@@ -5,9 +5,20 @@ import lime_img from "../../../assets/lime.png";
 import { CopyBlock } from "react-code-blocks";
 import { Copy } from "lucide-react";
 
-const code = `import pandas as pd;
-df = pd.read_csv('some_random.csv');
-df.head(5)`;
+const code = `import numpy as np
+import tensorflow as tf
+import matplotlib.pyplot as plt
+import cv2
+from tensorflow.keras.applications.vgg16 import VGG16, preprocess_input, decode_predictions
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.models import Model
+# Initialize LIME explainer
+    explainer = lime.lime_tabular.LimeTabularExplainer(
+    training_data=X_train,
+    feature_names=feature_names,
+    class_names=class_names,
+    discretize_continuous=True
+)`;
 const language = "python";
 const myCustomTheme = {
   lineNumberColor: "#ccc",
