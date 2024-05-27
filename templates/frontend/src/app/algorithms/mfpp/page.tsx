@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import Image from "next/image";
-import lime_img from "../../../assets/lime.png";
+import mfpp_img from "../../../assets/mfpp_img.png";
 import { CopyBlock } from "react-code-blocks";
 import { Copy } from "lucide-react";
 
@@ -78,21 +78,22 @@ const mfpp = () => {
           <div>
             <h1 className="text-2xl font-bold text-left">MFPP</h1>
             <p className="w-[50vw] text-sm text-left leading-loose">
-              LIME, known as Local Interpretable Model-agnostic Explanations, is
-              a method designed to shed light on the predictions made by machine
-              learning models. It operates independently of the model type,
-              focusing on explaining predictions in a localized context to
-              ensure accuracy in reflecting the model's behavior around a
-              specific data point. To create explanations, LIME alters the input
-              data around the point of interest and constructs an interpretable
-              model using this perturbed data to explain the model's
-              predictions. This interpretable model, often a simplified linear
-              model, is then used to provide insights into the prediction based
-              on the original input features.
+              The Morphological Fragmentation Pyramid offers a systematic
+              approach to dissecting complex systems into manageable components
+              across different scales. At the macro level, it analyzes the
+              entirety of the system and its environmental context. Moving to
+              the meso level, it breaks down the system into major subsystems,
+              examining their interactions and interfaces. At the micro level,
+              subsystems are further fragmented into individual components,
+              delving into their internal structures and functions. Finally, at
+              the nanolevel, the pyramid scrutinizes the elemental building
+              blocks and their interactions. This framework finds application in
+              diverse fields, aiding in organizational analysis, urban planning,
+              ecological studies, and engineering design.
             </p>
           </div>
-          <div className="mt-6 rounded-lg shadow-xl ml-6 border-gray-300 border">
-            <Image src={lime_img} width={500} height={500} alt="Lime image" />
+          <div className="mt-6 rounded-lg shadow-xl ml-16 border-gray-300 border">
+            <Image src={mfpp_img} width={500} height={500} alt="Lime image" />
             <p className="italic text-sm text-gray-500 mt-6">
               Source: https://arxiv.org/pdf/1602.04938.pdf
             </p>
