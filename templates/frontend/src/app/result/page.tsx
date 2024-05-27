@@ -258,16 +258,16 @@ const ResultPage: React.FC = () => {
               className="shadow-xl p-4 rounded-lg"
             />
           </div>
-          <div className="ml-44">
+          <div className="ml-52 mt-10 w-[250px] h-[250px]">
             <Image
               src={`http://localhost:8080/static/lung_seg_gen.png`}
               alt="LIME Explaination"
-              width="370"
-              height="370"
+              width="400"
+              height="400"
               className="shadow-xl p-4 rounded-lg"
             />
           </div>
-          <div className="flex flex-col gap-2 ml-32">
+          <div className="flex flex-col gap-2 ml-28">
             <div className="flex flex-row gap-2">
               <h2 className="bg-blue-700 rounded-sm text-white w-fit p-2">
                 LRP Explanation

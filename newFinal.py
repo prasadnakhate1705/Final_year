@@ -531,11 +531,6 @@ def LRP_exp(file_path):
                     plt.savefig(f"templates/frontend/src/app/lib/{layer_name}_lrp.png")
                     plt.savefig(f"static/{layer_name}_lrp.png")
 
-                    
-                    print('Lrp generation done')
-                # plt.show()
-                # conv2d_57_lrp
-                # conv2d_57_lrp
         else:
             plt.figure()
             plt.imshow(lrp_array, cmap='jet')  
